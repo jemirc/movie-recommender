@@ -8,7 +8,7 @@ private:
     std::string title;
     std::string genre;
     int releaseYear;
-    double totalRating; // averageRating 제거
+    double totalRating; // averageRating 제거 하신거임
     int ratingCount;    // 추가
 
 public:
@@ -17,7 +17,7 @@ public:
           const std::string &genre, int year);
 
     int getId() const;
-    std::string getTitle() const;
+    std::string getTitle() const; //getter들에 const들 다 붙여주심
     std::string getGenre() const;
     int getReleaseYear() const;      // getYear → getReleaseYear
     double getAverageRating() const; // getRating → getAverageRating

@@ -1,7 +1,7 @@
 #include "Movie.h"
 #include <iostream>
 
-// 기본 생성자
+// 기본 생성자도 만들어주신거임
 Movie::Movie()
     : id(0), releaseYear(0),
       totalRating(0.0), ratingCount(0) {}
@@ -19,6 +19,7 @@ std::string Movie::getGenre() const { return genre; }
 int Movie::getReleaseYear() const { return releaseYear; }
 int Movie::getRatingCount() const { return ratingCount; }
 
+// 이전것도 기억할 수 있게 구현 다 하신거임
 double Movie::getAverageRating() const
 {
     if (ratingCount == 0)
