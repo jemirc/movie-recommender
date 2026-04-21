@@ -69,6 +69,18 @@ void MovieManager::printAllMovies() const
     }
 }
 
+void MovieManager::printMoviesSortedByRating() const
+{
+    std::vector<Movie> sortedMovies = movies;
+
+    std::sort(sortedMovies.begin(), sortedMovies.end());
+
+    for (const Movie &movie : sortedMovies)
+    {
+        std::cout << movie << std::endl;
+    }
+}
+
 void MovieManager::sortMovies()
 {
     // Movie에 구현한 operator< 기준으로 바로 정렬 가능

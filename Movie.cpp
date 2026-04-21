@@ -40,6 +40,11 @@ bool Movie::operator==(const Movie &other) const
 
 bool Movie::operator<(const Movie &other) const
 {
+    if (getAverageRating() != other.getAverageRating())
+    {
+        return getAverageRating() > other.getAverageRating();
+    }
+
     return id < other.id;
 }
 

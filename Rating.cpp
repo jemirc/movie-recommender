@@ -33,7 +33,13 @@ int Rating::getMovieId() const
 
 void Rating::display() const
 {
-    cout << "유저 id (" << userId << ")님이 "
-         << "영화 id (" << movieId << ")에 "
-         << score << " 별점을 줬습니다" << endl;
+    cout << *this << endl;
+}
+
+ostream &operator<<(ostream &os, const Rating &rating)
+{
+    os << "사용자 " << rating.userId
+       << " -> 영화 " << rating.movieId
+       << " : " << rating.score;
+    return os;
 }

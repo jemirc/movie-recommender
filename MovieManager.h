@@ -20,6 +20,7 @@ public:
     const Movie *findMovieById(int id) const;                        // 읽기 전용으로 찾을때
     std::vector<const Movie *> searchMoviesByTitle(const std::string &keyword) const; // 제목에 키워드가 들어가는 영화들 찾기
     void printAllMovies() const;                                     // 전체 영화 목록 출력
+    void printMoviesSortedByRating() const;                          // 평점순으로 정렬해서 출력
     void sortMovies();                                               // Movie의 operator< 기준으로 정렬
 
     const std::vector<Movie> &getMovies() const;                     // 전체 영화 목록 참조로 넘겨주기
