@@ -10,6 +10,12 @@ string User::getEmail() const { return email; }
 
 void User::display() const
 {
-    cout << id << ". " << name
-         << " (" << email << ")" << endl;
+    cout << *this << endl;
+}
+
+ostream &operator<<(ostream &os, const User &user)
+{
+    os << user.id << ". " << user.name
+       << " (" << user.email << ")";
+    return os;
 }

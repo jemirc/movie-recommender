@@ -1,5 +1,7 @@
 #include "UserManager.h"
 
+#include <iostream>
+
 bool UserManager::addUser(const User &user)
 {
     // id가 같은 유저가 이미 있으면 추가 안하려는거임
@@ -42,6 +44,15 @@ const User *UserManager::findUserById(int id) const
     }
 
     return nullptr;
+}
+
+void UserManager::printAllUsers() const
+{
+    // 유저 정보 출력도 User의 operator<<를 활용해서 통일하는거임
+    for (const User &user : users)
+    {
+        std::cout << user << std::endl;
+    }
 }
 
 const std::vector<User> &UserManager::getUsers() const
