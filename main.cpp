@@ -21,7 +21,7 @@ int main()
 
     cout << "------ [1] 초기 영화 상태 (0 나눗셈 방어 확인) ------" << endl;
     // 평점이 없을 때 getAverageRating()이 0을 잘 반환하는지 확인
-    movies[1].display();
+    cout << movies[1] << endl;
 
     cout << "\n------ [2] 정상적인 평점 입력 및 반영 ------" << endl;
     // 이재민이 인터스텔라에 4.9점
@@ -54,7 +54,7 @@ int main()
     cout << "\n------ [6] Movie 최종 상태 출력 ------" << endl;
     for (const Movie &m : movies)
     {
-        m.display();
+        cout << m << endl;
     }
 
     return 0;

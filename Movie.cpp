@@ -1,6 +1,4 @@
 #include "Movie.h"
-#include <iostream>
-
 // 기본 생성자도 만들어주신거임
 Movie::Movie()
     : id(0), releaseYear(0),
@@ -35,11 +33,21 @@ void Movie::addRating(double r)
     ratingCount++;
 }
 
-void Movie::display() const
-{ // 중복 제거 — 하나만 유지
-    std::cout << id << ". " << title
-              << " (" << releaseYear << ")"
-              << "  평점: " << getAverageRating()
-              << " (" << ratingCount << "건)"
-              << std::endl;
+bool Movie::operator==(const Movie &other) const
+{
+    return id == other.id;
+}
+
+bool Movie::operator<(const Movie &other) const
+{
+    return id < other.id;
+}
+
+std::ostream &operator<<(std::ostream &os, const Movie &movie)
+{
+    os << movie.id << ". " << movie.title
+       << " (" << movie.releaseYear << ")"
+       << "  평점: " << movie.getAverageRating()
+       << " (" << movie.ratingCount << "건)";
+    return os;
 }
