@@ -8,7 +8,7 @@ $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 # 각 소스 파일을 오브젝트 파일로 컴파일하는 규칙들
-main.o: main.cpp Movie.h User.h Rating.h
+main.o: main.cpp MovieManager.h UserManager.h Movie.h User.h
 	$(CXX) $(CXXFLAGS) -c $<
 
 Movie.o: Movie.cpp Movie.h

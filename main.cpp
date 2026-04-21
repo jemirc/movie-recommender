@@ -1,60 +1,70 @@
 #include <iostream>
-#include <vector>
-#include "Movie.h"
-#include "User.h"
-#include "Rating.h"
+#include <limits>
+
+#include "MovieManager.h"
+#include "UserManager.h"
 
 using namespace std;
 
+// 메인 메뉴 화면 출력만 따로 빼둔거임
+void printMainMenu()
+{
+    cout << "=== Movie Recommender ===" << endl;
+    cout << "[영화]" << endl;
+    cout << "1. 영화 추가" << endl;
+    cout << "2. 제목으로 검색" << endl;
+    cout << "3. 전체 목록 출력" << endl;
+    cout << "4. 평점순 정렬 출력" << endl;
+    cout << "[사용자]" << endl;
+    cout << "5. 사용자 추가" << endl;
+    cout << "6. 사용자 목록 출력" << endl;
+    cout << "[평점]" << endl;
+    cout << "7. 평점 입력" << endl;
+    cout << "8. 영화별 평점 보기" << endl;
+    cout << "0. 종료" << endl;
+    cout << endl;
+    cout << "선택 > ";
+}
+
 int main()
 {
-    vector<Movie> movies;
-    vector<User> users;
-    vector<Rating> ratings;
+    MovieManager movieManager;
+    UserManager userManager;
+    int menu = -1;
 
-    // 1. 초기 데이터 세팅
-    movies.emplace_back(1, "기생충", "드라마", 2019);
-    movies.emplace_back(2, "인터스텔라", "SF", 2014);
-
-    users.emplace_back(1, "이재민", "ljm00530@soongsil.ac.kr");
-    users.emplace_back(2, "김하람", "haram@soongsil.ac.kr");
-
-    cout << "------ [1] 초기 영화 상태 (0 나눗셈 방어 확인) ------" << endl;
-    // 평점이 없을 때 getAverageRating()이 0을 잘 반환하는지 확인
-    cout << movies[1] << endl;
-
-    cout << "\n------ [2] 정상적인 평점 입력 및 반영 ------" << endl;
-    // 이재민이 인터스텔라에 4.9점
-    ratings.emplace_back(1, 2, 4.9);
-    movies[1].addRating(4.9);
-
-    // 김하람이 기생충에 5.0점
-    ratings.emplace_back(2, 1, 5.0);
-    movies[0].addRating(5.0);
-    cout << "평점 반영 완료!\n";
-
-    cout << "\n------ [3] 잘못된 평점 입력 케이스 ------" << endl;
-    // 이재민이 기생충에 7.5점 입력 시도 (Rating 생성자에서 걸러지는지 확인)
-    cout << ">> 7.5점 입력 시도 중..." << endl;
-    ratings.emplace_back(1, 1, 7.5);
-    // 주의: 실제 영화(movies[0])에는 잘못된 점수를 addRating 하지 않음
-
-    cout << "\n------ [4] User 전체 목록 출력 ------" << endl;
-    for (const User &u : users)
+    // 지금 main은 매니저 객체 만들고 메뉴 루프만 담당하는 구조로 가는거임
+    while (true)
     {
-        u.display();
-    }
+        printMainMenu();
 
-    cout << "\n------ [5] Rating 전체 내역 출력 ------" << endl;
-    for (const Rating &r : ratings)
-    {
-        r.display();
-    }
+        // 숫자가 아닌 입력이 들어오면 스트림 상태 복구하고 다시 메뉴 보여주기
+        if (!(cin >> menu))
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
 
-    cout << "\n------ [6] Movie 최종 상태 출력 ------" << endl;
-    for (const Movie &m : movies)
-    {
-        cout << m << endl;
+        if (menu == 0)
+        {
+            break; // 0 입력하면 안전하게 반복문 종료
+        }
+
+        switch (menu)
+        {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+            // 세부 기능은 다음 단계에서 각 Manager 메서드랑 연결하면 되는거임
+            break;
+        default:
+            break;
+        }
     }
 
     return 0;
