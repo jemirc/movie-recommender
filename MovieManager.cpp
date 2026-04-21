@@ -1,6 +1,7 @@
 #include "MovieManager.h"
 
 #include <algorithm> // find, sort 같은 알고리즘 함수 쓰려고 넣은거임
+#include <iostream>
 
 bool MovieManager::addMovie(const Movie &movie)
 {
@@ -41,6 +42,31 @@ const Movie *MovieManager::findMovieById(int id) const
     }
 
     return nullptr;
+}
+
+std::vector<const Movie *> MovieManager::searchMoviesByTitle(const std::string &keyword) const
+{
+    std::vector<const Movie *> matchedMovies; // 검색 결과 담아둘 벡터
+
+    // 제목 안에 키워드가 포함되어 있으면 결과에 넣는거임
+    for (const Movie &movie : movies)
+    {
+        if (movie.getTitle().find(keyword) != std::string::npos)
+        {
+            matchedMovies.push_back(&movie);
+        }
+    }
+
+    return matchedMovies;
+}
+
+void MovieManager::printAllMovies() const
+{
+    // 영화 정보 출력은 Movie의 operator<<를 그대로 활용하는거임
+    for (const Movie &movie : movies)
+    {
+        std::cout << movie << std::endl;
+    }
 }
 
 void MovieManager::sortMovies()
