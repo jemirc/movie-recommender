@@ -29,7 +29,10 @@ UserManager.o: UserManager.cpp UserManager.h User.h
 RatingManager.o: RatingManager.cpp RatingManager.h Rating.h MovieManager.h UserManager.h
 	$(CXX) $(CXXFLAGS) -c $<
 
-.PHONY: clean
+.PHONY: clean run
+
+run: $(TARGET)
+	./$(TARGET)
 
 # 빌드하면서 생긴 파일들 지우는 용도
 clean:
