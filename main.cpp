@@ -11,18 +11,23 @@ using namespace std;
 // 메인 메뉴 화면 출력만 따로 빼둔거임
 void printMainMenu()
 {
-    cout << "=== Movie Recommender ===" << endl;
+    cout << endl
+         << "=== Movie Recommender ===" << endl
+         << endl;
     cout << "[영화]" << endl;
     cout << "1. 영화 추가" << endl;
     cout << "2. 제목으로 검색" << endl;
     cout << "3. 전체 목록 출력" << endl;
-    cout << "4. 평점순 정렬 출력" << endl;
+    cout << "4. 평점순 정렬 출력" << endl
+         << endl;
     cout << "[사용자]" << endl;
     cout << "5. 사용자 추가" << endl;
-    cout << "6. 사용자 목록 출력" << endl;
+    cout << "6. 사용자 목록 출력" << endl
+         << endl;
     cout << "[평점]" << endl;
     cout << "7. 평점 입력" << endl;
-    cout << "8. 영화별 평점 보기" << endl;
+    cout << "8. 영화별 평점 보기" << endl
+         << endl;
     cout << "0. 종료" << endl;
     cout << endl;
     cout << "선택 > ";
