@@ -15,7 +15,9 @@ void User::display() const
 
 ostream &operator<<(ostream &os, const User &user)
 {
-    os << user.id << ". " << user.name
-       << " (" << user.email << ")";
+    os << "[사용자] "
+       << "ID: " << user.id
+       << " | 이름: " << user.name
+       << " | 이메일: " << user.email;
     return os;
 }

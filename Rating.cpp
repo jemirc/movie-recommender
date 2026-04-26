@@ -54,8 +54,9 @@ bool Rating::operator==(const Rating &other) const
 
 ostream &operator<<(ostream &os, const Rating &rating)
 {
-    os << "사용자 " << rating.userId
-       << " -> 영화 " << rating.movieId
-       << " : " << rating.score;
+    os << "[평점] "
+       << "사용자 ID: " << rating.userId
+       << " | 영화 ID: " << rating.movieId
+       << " | 점수: " << rating.score;
     return os;
 }

@@ -62,9 +62,12 @@ bool Movie::operator<(const Movie &other) const
 
 std::ostream &operator<<(std::ostream &os, const Movie &movie)
 {
-    os << movie.id << ". " << movie.title
-       << " (" << movie.releaseYear << ")"
-       << "  평점: " << movie.getAverageRating()
-       << " (" << movie.ratingCount << "건)";
+    os << "[영화] "
+       << "ID: " << movie.id
+       << " | 제목: " << movie.title
+       << " | 장르: " << movie.genre
+       << " | 개봉 연도: " << movie.releaseYear
+       << " | 평균 평점: " << movie.getAverageRating()
+       << " | 평점 수: " << movie.ratingCount << "건";
     return os;
 }
