@@ -21,11 +21,6 @@ double Rating::getScore() const
     return score;
 }
 
-int Rating::getUserId() const
-{
-    return userId;
-}
-
 int Rating::getMovieId() const
 {
     return movieId;
@@ -40,11 +35,6 @@ bool Rating::setScore(double score)
 
     this->score = score;
     return true;
-}
-
-void Rating::display() const
-{
-    cout << *this << endl;
 }
 
 bool Rating::operator==(const Rating &other) const

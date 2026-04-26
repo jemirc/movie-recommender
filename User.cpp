@@ -8,11 +8,6 @@ int User::getId() const { return id; }
 string User::getName() const { return name; }
 string User::getEmail() const { return email; }
 
-void User::display() const
-{
-    cout << *this << endl;
-}
-
 ostream &operator<<(ostream &os, const User &user)
 {
     os << "[사용자] "

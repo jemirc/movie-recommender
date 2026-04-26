@@ -16,24 +16,6 @@ int MovieManager::addMovie(const std::string &title, const std::string &genre, i
     return id;
 }
 
-bool MovieManager::addMovie(const Movie &movie)
-{
-    // 같은 영화가 이미 있으면 또 넣지 않으려고 검사하는거임
-    if (std::find(movies.begin(), movies.end(), movie) != movies.end())
-    {
-        return false;
-    }
-
-    // 중복 아니면 목록에 추가
-    movies.push_back(movie);
-    if (movie.getId() >= nextId)
-    {
-        nextId = movie.getId() + 1;
-    }
-
-    return true;
-}
-
 Movie *MovieManager::findMovieById(int id)
 {
     // id로 순차 탐색해서 실제 객체 주소를 돌려주는거임
@@ -97,18 +79,6 @@ void MovieManager::printMoviesSortedByRating() const
     {
         std::cout << movie << std::endl;
     }
-}
-
-void MovieManager::sortMovies()
-{
-    // Movie에 구현한 operator< 기준으로 바로 정렬 가능
-    std::sort(movies.begin(), movies.end());
-}
-
-const std::vector<Movie> &MovieManager::getMovies() const
-{
-    // 복사하지 말고 참조로 넘겨주는거임
-    return movies;
 }
 
 std::size_t MovieManager::getMovieCount() const

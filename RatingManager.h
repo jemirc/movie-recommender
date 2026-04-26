@@ -22,6 +22,5 @@ public:
     std::vector<const Rating *> getRatingsByMovieId(int movieId) const;
     void printRatingsByMovieId(int movieId) const;
 
-    const std::vector<Rating> &getRatings() const;
     std::size_t getRatingCount() const;
 };

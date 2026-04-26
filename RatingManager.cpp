@@ -82,11 +82,6 @@ void RatingManager::printRatingsByMovieId(int movieId) const
     }
 }
 
-const std::vector<Rating> &RatingManager::getRatings() const
-{
-    return ratings;
-}
-
 std::size_t RatingManager::getRatingCount() const
 {
     return ratings.size();
