@@ -56,6 +56,7 @@ bool Movie::operator<(const Movie &other) const
     return id < other.id;
 }
 
+// 왼쪽에 os를 넣기위해 friend로 선언해서 private 멤버에도 접근 가능하게
 std::ostream &operator<<(std::ostream &os, const Movie &movie)
 {
     os << "[영화] "

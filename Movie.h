@@ -29,5 +29,6 @@ public:
     bool operator==(const Movie &other) const;
     bool operator<(const Movie &other) const;
 
+    // friends로 operator<< 선언해서 외부에서 private 접근 가능하게
     friend std::ostream &operator<<(std::ostream &os, const Movie &movie);
 };
