@@ -32,11 +32,13 @@ bool RatingManager::addRating(int userId, int movieId, double score, const UserM
 
     Rating newRating(userId, movieId, score);
 
+    // 이미 평점을 준 적이 있는지 확인해서 있으면 업데이트
     for (Rating &rating : ratings)
     {
         if (rating == newRating)
         {
             const double oldScore = rating.getScore();
+            // 영화의 평점 업데이트와 Rating 객체의 점수 업데이트 둘 다 성공해야 true 반환, 하나라도 실패하면 false 반환
             if (!movie->updateRating(oldScore, score) || !rating.setScore(score))
             {
                 return false;
@@ -47,6 +49,7 @@ bool RatingManager::addRating(int userId, int movieId, double score, const UserM
         }
     }
 
+    // 없으면 새로 추가
     ratings.push_back(newRating);
     movie->addRating(newRating.getScore());
     return true;

@@ -27,8 +27,6 @@ double Movie::getAverageRating() const
 
 void Movie::addRating(double r)
 {
-    if (r < 0.0 || r > 5.0)
-        return; // 유효성 검사
     totalRating += r;
     ratingCount++;
 }
@@ -36,9 +34,6 @@ void Movie::addRating(double r)
 bool Movie::updateRating(double oldRating, double newRating)
 {
     if (ratingCount == 0)
-        return false;
-
-    if (oldRating < 0.0 || oldRating > 5.0 || newRating < 0.0 || newRating > 5.0)
         return false;
 
     totalRating += newRating - oldRating;
@@ -57,6 +52,7 @@ bool Movie::operator<(const Movie &other) const
         return getAverageRating() > other.getAverageRating();
     }
 
+    // 평점이 같으면 ID로 비교
     return id < other.id;
 }
 
