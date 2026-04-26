@@ -41,13 +41,10 @@ void clearInput()
 
 void addMovieMenu(MovieManager &movieManager)
 {
-    int id = 0;
     int year = 0;
     string title;
     string genre;
 
-    cout << "영화 ID: ";
-    cin >> id;
     clearInput();
 
     cout << "제목: ";
@@ -60,13 +57,8 @@ void addMovieMenu(MovieManager &movieManager)
     cin >> year;
     clearInput();
 
-    if (movieManager.addMovie(Movie(id, title, genre, year)))
-    {
-        cout << "영화가 추가되었습니다." << endl;
-        return;
-    }
-
-    cout << "같은 ID의 영화가 이미 존재합니다." << endl;
+    int id = movieManager.addMovie(title, genre, year);
+    cout << "영화가 추가되었습니다. 영화 ID: " << id << endl;
 }
 
 void searchMovieMenu(const MovieManager &movieManager)

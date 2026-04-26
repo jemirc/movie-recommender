@@ -3,6 +3,19 @@
 #include <algorithm> // find, sort 같은 알고리즘 함수 쓰려고 넣은거임
 #include <iostream>
 
+MovieManager::MovieManager()
+    : nextId(1)
+{
+}
+
+int MovieManager::addMovie(const std::string &title, const std::string &genre, int year)
+{
+    int id = nextId;
+    movies.push_back(Movie(id, title, genre, year));
+    nextId++;
+    return id;
+}
+
 bool MovieManager::addMovie(const Movie &movie)
 {
     // 같은 영화가 이미 있으면 또 넣지 않으려고 검사하는거임
@@ -13,6 +26,11 @@ bool MovieManager::addMovie(const Movie &movie)
 
     // 중복 아니면 목록에 추가
     movies.push_back(movie);
+    if (movie.getId() >= nextId)
+    {
+        nextId = movie.getId() + 1;
+    }
+
     return true;
 }
 

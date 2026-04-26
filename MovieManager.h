@@ -11,10 +11,12 @@ class MovieManager
 {
 private:
     std::vector<Movie> movies; // 영화 목록은 vector로 들고가는거임
+    int nextId;                // 다음에 추가될 영화 ID
 
 public:
-    MovieManager() = default; // 지금은 따로 초기화할게 없어서 기본 생성자 그대로 씀
+    MovieManager();
 
+    int addMovie(const std::string &title, const std::string &genre, int year); // ID는 자동으로 부여
     bool addMovie(const Movie &movie);                               // 영화 추가할때 중복도 같이 검사하려는거임
     Movie *findMovieById(int id);                                    // 수정 가능한 영화 찾을때
     const Movie *findMovieById(int id) const;                        // 읽기 전용으로 찾을때
