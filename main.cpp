@@ -113,12 +113,9 @@ void printSortedMoviesMenu(const MovieManager &movieManager)
 
 void addUserMenu(UserManager &userManager)
 {
-    int id = 0;
     string name;
     string email;
 
-    cout << "사용자 ID: ";
-    cin >> id;
     clearInput();
 
     cout << "이름: ";
@@ -127,13 +124,8 @@ void addUserMenu(UserManager &userManager)
     cout << "이메일: ";
     getline(cin, email);
 
-    if (userManager.addUser(User(id, name, email)))
-    {
-        cout << "사용자가 추가되었습니다." << endl;
-        return;
-    }
-
-    cout << "같은 ID의 사용자가 이미 존재합니다." << endl;
+    int id = userManager.addUser(name, email);
+    cout << "사용자가 추가되었습니다. 사용자 ID: " << id << endl;
 }
 
 void printAllUsersMenu(const UserManager &userManager)

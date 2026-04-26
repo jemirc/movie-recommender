@@ -2,6 +2,19 @@
 
 #include <iostream>
 
+UserManager::UserManager()
+    : nextId(1)
+{
+}
+
+int UserManager::addUser(const std::string &name, const std::string &email)
+{
+    int id = nextId;
+    users.push_back(User(id, name, email));
+    nextId++;
+    return id;
+}
+
 bool UserManager::addUser(const User &user)
 {
     // id가 같은 유저가 이미 있으면 추가 안하려는거임
@@ -15,6 +28,11 @@ bool UserManager::addUser(const User &user)
 
     // 새 유저면 vector 뒤에 붙이기
     users.push_back(user);
+    if (user.getId() >= nextId)
+    {
+        nextId = user.getId() + 1;
+    }
+
     return true;
 }
 
