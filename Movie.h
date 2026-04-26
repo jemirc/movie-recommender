@@ -18,7 +18,7 @@ public:
           const std::string &genre, int year);
 
     int getId() const;
-    std::string getTitle() const; //getter들에 const들 다 붙여주심
+    std::string getTitle() const; // getter들에 const들 다 붙여주심
     std::string getGenre() const;
     int getReleaseYear() const;      // getYear → getReleaseYear
     double getAverageRating() const; // getRating → getAverageRating
