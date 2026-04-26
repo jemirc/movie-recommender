@@ -14,7 +14,9 @@ public:
     double getScore() const;
     int getUserId() const;
     int getMovieId() const;
+    bool setScore(double score);
     void display() const;
+    bool operator==(const Rating &other) const;
 
     friend std::ostream &operator<<(std::ostream &os, const Rating &rating);
 };

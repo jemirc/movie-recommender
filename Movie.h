@@ -25,6 +25,7 @@ public:
     int getRatingCount() const;      // 추가
 
     void addRating(double r); // 추가
+    bool updateRating(double oldRating, double newRating);
     bool operator==(const Movie &other) const;
     bool operator<(const Movie &other) const;
 

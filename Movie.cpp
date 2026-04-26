@@ -33,6 +33,18 @@ void Movie::addRating(double r)
     ratingCount++;
 }
 
+bool Movie::updateRating(double oldRating, double newRating)
+{
+    if (ratingCount == 0)
+        return false;
+
+    if (oldRating < 0.0 || oldRating > 5.0 || newRating < 0.0 || newRating > 5.0)
+        return false;
+
+    totalRating += newRating - oldRating;
+    return true;
+}
+
 bool Movie::operator==(const Movie &other) const
 {
     return id == other.id;

@@ -163,11 +163,18 @@ void addRatingMenu(RatingManager &ratingManager, const UserManager &userManager,
 
     if (ratingManager.addRating(userId, movieId, score, userManager, movieManager))
     {
-        cout << "평점이 등록되었습니다." << endl;
+        if (ratingManager.wasLastRatingUpdated())
+        {
+            cout << "기존 평점이 수정되었습니다." << endl;
+        }
+        else
+        {
+            cout << "평점이 등록되었습니다." << endl;
+        }
         return;
     }
 
-    cout << "평점을 등록할 수 없습니다. 사용자/영화 ID를 확인하거나 중복 평점인지 확인하세요." << endl;
+    cout << "평점을 등록할 수 없습니다. 사용자/영화 ID와 평점 범위를 확인하세요." << endl;
 }
 
 void printMovieRatingsMenu(const MovieManager &movieManager, const RatingManager &ratingManager)

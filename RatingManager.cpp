@@ -5,8 +5,15 @@
 #include "MovieManager.h"
 #include "UserManager.h"
 
+RatingManager::RatingManager()
+    : lastRatingUpdated(false)
+{
+}
+
 bool RatingManager::addRating(int userId, int movieId, double score, const UserManager &userManager, MovieManager &movieManager)
 {
+    lastRatingUpdated = false;
+
     if (score < 0.0 || score > 5.0)
     {
         return false;
@@ -23,18 +30,31 @@ bool RatingManager::addRating(int userId, int movieId, double score, const UserM
         return false;
     }
 
-    for (const Rating &rating : ratings)
+    Rating newRating(userId, movieId, score);
+
+    for (Rating &rating : ratings)
     {
-        if (rating.getUserId() == userId && rating.getMovieId() == movieId)
+        if (rating == newRating)
         {
-            return false;
+            const double oldScore = rating.getScore();
+            if (!movie->updateRating(oldScore, score) || !rating.setScore(score))
+            {
+                return false;
+            }
+
+            lastRatingUpdated = true;
+            return true;
         }
     }
 
-    Rating rating(userId, movieId, score);
-    ratings.push_back(rating);
-    movie->addRating(rating.getScore());
+    ratings.push_back(newRating);
+    movie->addRating(newRating.getScore());
     return true;
+}
+
+bool RatingManager::wasLastRatingUpdated() const
+{
+    return lastRatingUpdated;
 }
 
 std::vector<const Rating *> RatingManager::getRatingsByMovieId(int movieId) const

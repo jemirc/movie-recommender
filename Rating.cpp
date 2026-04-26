@@ -31,9 +31,25 @@ int Rating::getMovieId() const
     return movieId;
 }
 
+bool Rating::setScore(double score)
+{
+    if (score < 0.0 || score > 5.0)
+    {
+        return false;
+    }
+
+    this->score = score;
+    return true;
+}
+
 void Rating::display() const
 {
     cout << *this << endl;
+}
+
+bool Rating::operator==(const Rating &other) const
+{
+    return userId == other.userId && movieId == other.movieId;
 }
 
 ostream &operator<<(ostream &os, const Rating &rating)
