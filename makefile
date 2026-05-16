@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -g
 TARGET = movie_recommender
-OBJS = main.o Movie.o User.o Rating.o MovieManager.o UserManager.o RatingManager.o DisplayManager.o
+OBJS = main.o Movie.o User.o Rating.o MovieManager.o UserManager.o RatingManager.o DisplayManager.o SimilarityCalculator.o Recommender.o
 
 # 최종 실행 파일 만드는 규칙
 $(TARGET): $(OBJS)
@@ -20,16 +20,22 @@ User.o: User.cpp User.h
 Rating.o: Rating.cpp Rating.h
 	$(CXX) $(CXXFLAGS) -c $<
 
-MovieManager.o: MovieManager.cpp MovieManager.h Movie.h
+MovieManager.o: MovieManager.cpp MovieManager.h BaseManager.h Movie.h Rating.h
 	$(CXX) $(CXXFLAGS) -c $<
 
-UserManager.o: UserManager.cpp UserManager.h User.h
+UserManager.o: UserManager.cpp UserManager.h BaseManager.h User.h
 	$(CXX) $(CXXFLAGS) -c $<
 
-RatingManager.o: RatingManager.cpp RatingManager.h Rating.h MovieManager.h UserManager.h
+RatingManager.o: RatingManager.cpp RatingManager.h BaseManager.h Rating.h MovieManager.h UserManager.h
 	$(CXX) $(CXXFLAGS) -c $<
 
-DisplayManager.o: DisplayManager.cpp DisplayManager.h MovieManager.h UserManager.h RatingManager.h Movie.h User.h Rating.h
+DisplayManager.o: DisplayManager.cpp DisplayManager.h Recommender.h MovieManager.h UserManager.h RatingManager.h Movie.h User.h Rating.h SimilarityCalculator.h
+	$(CXX) $(CXXFLAGS) -c $<
+
+SimilarityCalculator.o: SimilarityCalculator.cpp SimilarityCalculator.h Rating.h
+	$(CXX) $(CXXFLAGS) -c $<
+
+Recommender.o: Recommender.cpp Recommender.h SimilarityCalculator.h MovieManager.h RatingManager.h Movie.h Rating.h
 	$(CXX) $(CXXFLAGS) -c $<
 
 .PHONY: clean run
