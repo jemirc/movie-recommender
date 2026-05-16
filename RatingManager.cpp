@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <sstream>
 
 #include "MovieManager.h"
@@ -135,6 +136,38 @@ bool RatingManager::addRating(int userId, int movieId, double score, const UserM
 bool RatingManager::wasLastRatingUpdated() const
 {
     return lastRatingUpdated;
+}
+
+std::vector<Rating> RatingManager::findByUser(int userId) const
+{
+    std::vector<Rating> matchedRatings;
+
+    for (const Rating &rating : ratings)
+    {
+        if (rating.getUserId() == userId)
+        {
+            matchedRatings.push_back(rating);
+        }
+    }
+
+    return matchedRatings;
+}
+
+std::vector<int> RatingManager::getAllUserIds() const
+{
+    std::set<int> uniqueUserIds;
+
+    for (const Rating &rating : ratings)
+    {
+        uniqueUserIds.insert(rating.getUserId());
+    }
+
+    return std::vector<int>(uniqueUserIds.begin(), uniqueUserIds.end());
+}
+
+const std::vector<Rating> &RatingManager::getAllRatings() const
+{
+    return ratings;
 }
 
 std::vector<const Rating *> RatingManager::getRatingsByMovieId(int movieId) const

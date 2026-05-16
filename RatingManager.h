@@ -24,6 +24,9 @@ public:
     void saveToFile(const std::string &filename) const override;
     std::size_t size() const override;
     bool wasLastRatingUpdated() const;
+    std::vector<Rating> findByUser(int userId) const;
+    std::vector<int> getAllUserIds() const;
+    const std::vector<Rating> &getAllRatings() const;
     std::vector<const Rating *> getRatingsByMovieId(int movieId) const;
     void printRatingsByMovieId(int movieId) const;
 
