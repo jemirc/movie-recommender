@@ -1,9 +1,19 @@
 #include "RatingManager.h"
 
+#include <fstream>
 #include <iostream>
+#include <sstream>
 
 #include "MovieManager.h"
 #include "UserManager.h"
+
+namespace
+{
+bool shouldSkipLine(const std::string &line)
+{
+    return line.empty() || line[0] == '#';
+}
+}
 
 RatingManager::RatingManager()
     : lastRatingUpdated(false)
@@ -12,7 +22,48 @@ RatingManager::RatingManager()
 
 void RatingManager::loadFromFile(const std::string &filename)
 {
-    (void)filename;
+    ratings.clear();
+    lastRatingUpdated = false;
+
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        return;
+    }
+
+    std::string line;
+
+    while (std::getline(file, line))
+    {
+        if (shouldSkipLine(line))
+        {
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string userIdText;
+        std::string movieIdText;
+        std::string scoreText;
+
+        if (!std::getline(ss, userIdText, ',') ||
+            !std::getline(ss, movieIdText, ',') ||
+            !std::getline(ss, scoreText))
+        {
+            continue;
+        }
+
+        try
+        {
+            const int userId = std::stoi(userIdText);
+            const int movieId = std::stoi(movieIdText);
+            const double score = std::stod(scoreText);
+            ratings.push_back(Rating(userId, movieId, score));
+        }
+        catch (const std::exception &)
+        {
+            continue;
+        }
+    }
 }
 
 void RatingManager::saveToFile(const std::string &filename) const

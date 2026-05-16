@@ -1,6 +1,16 @@
 #include "UserManager.h"
 
+#include <fstream>
 #include <iostream>
+#include <sstream>
+
+namespace
+{
+bool shouldSkipLine(const std::string &line)
+{
+    return line.empty() || line[0] == '#';
+}
+}
 
 UserManager::UserManager()
     : nextId(1)
@@ -17,12 +27,70 @@ int UserManager::addUser(const std::string &name, const std::string &email)
 
 void UserManager::loadFromFile(const std::string &filename)
 {
-    (void)filename;
+    users.clear();
+    nextId = 1;
+
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        return;
+    }
+
+    std::string line;
+    int maxId = 0;
+
+    while (std::getline(file, line))
+    {
+        if (shouldSkipLine(line))
+        {
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string idText;
+        std::string name;
+        std::string email;
+
+        if (!std::getline(ss, idText, ',') ||
+            !std::getline(ss, name, ',') ||
+            !std::getline(ss, email))
+        {
+            continue;
+        }
+
+        try
+        {
+            const int id = std::stoi(idText);
+            users.push_back(User(id, name, email));
+
+            if (id > maxId)
+            {
+                maxId = id;
+            }
+        }
+        catch (const std::exception &)
+        {
+            continue;
+        }
+    }
+
+    nextId = maxId + 1;
 }
 
 void UserManager::saveToFile(const std::string &filename) const
 {
-    (void)filename;
+    std::ofstream file(filename);
+    if (!file.is_open())
+    {
+        return;
+    }
+
+    for (const User &user : users)
+    {
+        file << user.getId() << ','
+             << user.getName() << ','
+             << user.getEmail() << '\n';
+    }
 }
 
 std::size_t UserManager::size() const

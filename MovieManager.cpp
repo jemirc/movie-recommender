@@ -1,7 +1,17 @@
 #include "MovieManager.h"
 
 #include <algorithm> // find, sort 같은 알고리즘 함수 쓰려고 넣은거임
+#include <fstream>
 #include <iostream>
+#include <sstream>
+
+namespace
+{
+bool shouldSkipLine(const std::string &line)
+{
+    return line.empty() || line[0] == '#';
+}
+}
 
 MovieManager::MovieManager()
     : nextId(1)
@@ -18,12 +28,74 @@ int MovieManager::addMovie(const std::string &title, const std::string &genre, i
 
 void MovieManager::loadFromFile(const std::string &filename)
 {
-    (void)filename;
+    movies.clear();
+    nextId = 1;
+
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        return;
+    }
+
+    std::string line;
+    int maxId = 0;
+
+    while (std::getline(file, line))
+    {
+        if (shouldSkipLine(line))
+        {
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string idText;
+        std::string title;
+        std::string genre;
+        std::string yearText;
+
+        if (!std::getline(ss, idText, ',') ||
+            !std::getline(ss, title, ',') ||
+            !std::getline(ss, genre, ',') ||
+            !std::getline(ss, yearText))
+        {
+            continue;
+        }
+
+        try
+        {
+            const int id = std::stoi(idText);
+            const int year = std::stoi(yearText);
+            movies.push_back(Movie(id, title, genre, year));
+
+            if (id > maxId)
+            {
+                maxId = id;
+            }
+        }
+        catch (const std::exception &)
+        {
+            continue;
+        }
+    }
+
+    nextId = maxId + 1;
 }
 
 void MovieManager::saveToFile(const std::string &filename) const
 {
-    (void)filename;
+    std::ofstream file(filename);
+    if (!file.is_open())
+    {
+        return;
+    }
+
+    for (const Movie &movie : movies)
+    {
+        file << movie.getId() << ','
+             << movie.getTitle() << ','
+             << movie.getGenre() << ','
+             << movie.getReleaseYear() << '\n';
+    }
 }
 
 std::size_t MovieManager::size() const
