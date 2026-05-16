@@ -68,7 +68,18 @@ void RatingManager::loadFromFile(const std::string &filename)
 
 void RatingManager::saveToFile(const std::string &filename) const
 {
-    (void)filename;
+    std::ofstream file(filename);
+    if (!file.is_open())
+    {
+        return;
+    }
+
+    for (const Rating &rating : ratings)
+    {
+        file << rating.getUserId() << ','
+             << rating.getMovieId() << ','
+             << rating.getScore() << '\n';
+    }
 }
 
 std::size_t RatingManager::size() const

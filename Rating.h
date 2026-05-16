@@ -11,6 +11,7 @@ private:
 
 public:
     Rating(int userId, int movieId, double score);
+    int getUserId() const;
     double getScore() const;
     int getMovieId() const;
     bool setScore(double score);

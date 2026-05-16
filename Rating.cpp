@@ -4,7 +4,12 @@
 using namespace std;
 Rating::Rating(int userId, int movieId, double score)
     : userId(userId), movieId(movieId), score(score) {}
-    
+
+int Rating::getUserId() const
+{
+    return userId;
+}
+
 double Rating::getScore() const
 {
     return score;
