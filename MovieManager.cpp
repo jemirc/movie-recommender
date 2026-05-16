@@ -168,6 +168,23 @@ void MovieManager::printMoviesSortedByRating() const
     }
 }
 
+void MovieManager::rebuildRatingsFrom(const std::vector<Rating> &ratings)
+{
+    for (Movie &movie : movies)
+    {
+        movie.resetRatings();
+    }
+
+    for (const Rating &rating : ratings)
+    {
+        Movie *movie = findMovieById(rating.getMovieId());
+        if (movie != nullptr)
+        {
+            movie->addRating(rating.getScore());
+        }
+    }
+}
+
 std::size_t MovieManager::getMovieCount() const
 {
     // vector 안에 들어있는 영화 개수 반환

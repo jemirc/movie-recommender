@@ -25,4 +25,5 @@ public:
     void printAllUsersMenu() const;     // 6번 메뉴 안쪽 구현
     void addRatingMenu();               // 7번 메뉴 안쪽 구현
     void printMovieRatingsMenu() const; // 8번 메뉴 안쪽 구현
+    void recommendMovieMenu() const;    // 9번 메뉴 안쪽 구현
 };

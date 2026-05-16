@@ -6,6 +6,7 @@
 
 #include "BaseManager.h"
 #include "Movie.h"
+#include "Rating.h"
 
 // Movie 객체 여러개를 한곳에서 관리하려고 만든 클래스
 class MovieManager : public BaseManager
@@ -26,5 +27,6 @@ public:
     std::vector<const Movie *> searchMoviesByTitle(const std::string &keyword) const; // 제목에 키워드가 들어가는 영화들 찾기
     void printAllMovies() const;                                                      // 전체 영화 목록 출력
     void printMoviesSortedByRating() const;                                           // 평점순으로 정렬해서 출력
+    void rebuildRatingsFrom(const std::vector<Rating> &ratings);
     std::size_t getMovieCount() const;           // 현재 영화가 몇개 있는지 확인용
 };

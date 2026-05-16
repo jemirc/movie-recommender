@@ -31,6 +31,12 @@ void Movie::addRating(double r)
     ratingCount++;
 }
 
+void Movie::resetRatings()
+{
+    totalRating = 0.0;
+    ratingCount = 0;
+}
+
 bool Movie::updateRating(double oldRating, double newRating)
 {
     if (ratingCount == 0)

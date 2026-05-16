@@ -4,6 +4,8 @@
 #include <limits>
 #include <string>
 
+#include "Recommender.h"
+
 DisplayManager::DisplayManager(MovieManager &movieManager, UserManager &userManager, RatingManager &ratingManager)
     : movieManager(movieManager), userManager(userManager), ratingManager(ratingManager)
 {
@@ -172,4 +174,40 @@ void DisplayManager::printMovieRatingsMenu() const
     }
 
     ratingManager.printRatingsByMovieId(movieId);
+}
+
+void DisplayManager::recommendMovieMenu() const
+{
+    int userId = 0;
+
+    std::cout << "추천받을 사용자 ID: ";
+    std::cin >> userId;
+    clearInput();
+
+    if (userManager.findUserById(userId) == nullptr)
+    {
+        std::cout << "해당 사용자가 없습니다." << std::endl;
+        return;
+    }
+
+    if (ratingManager.findByUser(userId).empty())
+    {
+        std::cout << "해당 사용자의 평점이 없습니다." << std::endl;
+        return;
+    }
+
+    Recommender recommender(movieManager, ratingManager);
+    const auto recommendations = recommender.recommend(userId, 3, 5);
+
+    if (recommendations.empty())
+    {
+        std::cout << "추천할 영화가 없습니다." << std::endl;
+        return;
+    }
+
+    std::cout << "=== 추천 영화 ===" << std::endl;
+    for (const auto &[movie, score] : recommendations)
+    {
+        std::cout << *movie << " | 추천 점수: " << score << std::endl;
+    }
 }

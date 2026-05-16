@@ -11,6 +11,10 @@ int main()
     MovieManager movieManager;
     UserManager userManager;
     RatingManager ratingManager;
+    movieManager.loadFromFile("data/movies.csv");
+    userManager.loadFromFile("data/users.csv");
+    ratingManager.loadFromFile("data/ratings.csv");
+    movieManager.rebuildRatingsFrom(ratingManager.getAllRatings());
     DisplayManager displayManager(movieManager, userManager, ratingManager);
     int menu = -1;
     bool isRunning = true;
@@ -41,6 +45,9 @@ int main()
         std::cout << "[평점]" << std::endl;
         std::cout << "7. 평점 입력" << std::endl;
         std::cout << "8. 영화별 평점 보기" << std::endl
+                  << std::endl;
+        std::cout << "[추천]" << std::endl;
+        std::cout << "9. 사용자별 영화 추천" << std::endl
                   << std::endl;
         std::cout << "0. 종료" << std::endl;
         std::cout << std::endl;
@@ -82,11 +89,18 @@ int main()
         case 8:
             displayManager.printMovieRatingsMenu();
             break;
+        case 9:
+            displayManager.recommendMovieMenu();
+            break;
         default:
             std::cout << "올바른 메뉴 번호를 입력해 주세요." << std::endl;
             break;
         }
     }
+
+    movieManager.saveToFile("data/movies.csv");
+    userManager.saveToFile("data/users.csv");
+    ratingManager.saveToFile("data/ratings.csv");
 
     return 0;
 }
