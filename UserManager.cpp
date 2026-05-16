@@ -15,6 +15,21 @@ int UserManager::addUser(const std::string &name, const std::string &email)
     return id;
 }
 
+void UserManager::loadFromFile(const std::string &filename)
+{
+    (void)filename;
+}
+
+void UserManager::saveToFile(const std::string &filename) const
+{
+    (void)filename;
+}
+
+std::size_t UserManager::size() const
+{
+    return users.size();
+}
+
 const User *UserManager::findUserById(int id) const
 {
     // const 버전은 읽기만 가능하게 const 포인터로 돌려줌
@@ -41,5 +56,5 @@ void UserManager::printAllUsers() const
 std::size_t UserManager::getUserCount() const
 {
     // 현재 등록된 유저 수 반환
-    return users.size();
+    return size();
 }

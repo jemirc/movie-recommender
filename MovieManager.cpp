@@ -16,6 +16,21 @@ int MovieManager::addMovie(const std::string &title, const std::string &genre, i
     return id;
 }
 
+void MovieManager::loadFromFile(const std::string &filename)
+{
+    (void)filename;
+}
+
+void MovieManager::saveToFile(const std::string &filename) const
+{
+    (void)filename;
+}
+
+std::size_t MovieManager::size() const
+{
+    return movies.size();
+}
+
 Movie *MovieManager::findMovieById(int id)
 {
     // id로 순차 탐색해서 실제 객체 주소를 돌려주는거임
@@ -84,5 +99,5 @@ void MovieManager::printMoviesSortedByRating() const
 std::size_t MovieManager::getMovieCount() const
 {
     // vector 안에 들어있는 영화 개수 반환
-    return movies.size();
+    return size();
 }

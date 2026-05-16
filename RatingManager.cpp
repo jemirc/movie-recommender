@@ -10,6 +10,21 @@ RatingManager::RatingManager()
 {
 }
 
+void RatingManager::loadFromFile(const std::string &filename)
+{
+    (void)filename;
+}
+
+void RatingManager::saveToFile(const std::string &filename) const
+{
+    (void)filename;
+}
+
+std::size_t RatingManager::size() const
+{
+    return ratings.size();
+}
+
 bool RatingManager::addRating(int userId, int movieId, double score, const UserManager &userManager, MovieManager &movieManager)
 {
     lastRatingUpdated = false;
@@ -87,5 +102,5 @@ void RatingManager::printRatingsByMovieId(int movieId) const
 
 std::size_t RatingManager::getRatingCount() const
 {
-    return ratings.size();
+    return size();
 }
