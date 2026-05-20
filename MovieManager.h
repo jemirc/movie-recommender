@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -12,7 +13,7 @@
 class MovieManager : public BaseManager
 {
 private:
-    std::vector<Movie> movies; // 영화 목록은 vector로 들고가는거임
+    std::vector<std::unique_ptr<Movie>> movies; // vector는 유지하되 Movie 객체 주소는 안정적으로 보관
     int nextId;                // 다음에 추가될 영화 ID
 
 public:

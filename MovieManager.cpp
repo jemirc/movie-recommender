@@ -3,6 +3,7 @@
 #include <algorithm> // find, sort 같은 알고리즘 함수 쓰려고 넣은거임
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 namespace
@@ -21,7 +22,7 @@ MovieManager::MovieManager()
 int MovieManager::addMovie(const std::string &title, const std::string &genre, int year)
 {
     int id = nextId;
-    movies.push_back(Movie(id, title, genre, year));
+    movies.push_back(std::make_unique<Movie>(id, title, genre, year));
     nextId++;
     return id;
 }
@@ -66,7 +67,7 @@ void MovieManager::loadFromFile(const std::string &filename)
         {
             const int id = std::stoi(idText);
             const int year = std::stoi(yearText);
-            movies.push_back(Movie(id, title, genre, year));
+            movies.push_back(std::make_unique<Movie>(id, title, genre, year));
 
             if (id > maxId)
             {
@@ -91,12 +92,12 @@ void MovieManager::saveToFile(const std::string &filename) const
         return;
     }
 
-    for (const Movie &movie : movies)
+    for (const std::unique_ptr<Movie> &movie : movies)
     {
-        file << movie.getId() << ','
-             << movie.getTitle() << ','
-             << movie.getGenre() << ','
-             << movie.getReleaseYear() << '\n';
+        file << movie->getId() << ','
+             << movie->getTitle() << ','
+             << movie->getGenre() << ','
+             << movie->getReleaseYear() << '\n';
     }
 }
 
@@ -108,11 +109,11 @@ std::size_t MovieManager::size() const
 Movie *MovieManager::findMovieById(int id)
 {
     // id로 순차 탐색해서 실제 객체 주소를 돌려주는거임
-    for (Movie &movie : movies)
+    for (const std::unique_ptr<Movie> &movie : movies)
     {
-        if (movie.getId() == id)
+        if (movie->getId() == id)
         {
-            return &movie;
+            return movie.get();
         }
     }
 
@@ -122,11 +123,11 @@ Movie *MovieManager::findMovieById(int id)
 const Movie *MovieManager::findMovieById(int id) const
 {
     // const 함수에서는 const 포인터로 돌려줘야 안전한거임
-    for (const Movie &movie : movies)
+    for (const std::unique_ptr<Movie> &movie : movies)
     {
-        if (movie.getId() == id)
+        if (movie->getId() == id)
         {
-            return &movie;
+            return movie.get();
         }
     }
 
@@ -138,11 +139,11 @@ std::vector<const Movie *> MovieManager::searchMoviesByTitle(const std::string &
     std::vector<const Movie *> matchedMovies; // 검색 결과 담아둘 벡터
 
     // 제목 안에 키워드가 포함되어 있으면 결과에 넣는거임
-    for (const Movie &movie : movies)
+    for (const std::unique_ptr<Movie> &movie : movies)
     {
-        if (movie.getTitle().find(keyword) != std::string::npos)
+        if (movie->getTitle().find(keyword) != std::string::npos)
         {
-            matchedMovies.push_back(&movie);
+            matchedMovies.push_back(movie.get());
         }
     }
 
@@ -152,29 +153,39 @@ std::vector<const Movie *> MovieManager::searchMoviesByTitle(const std::string &
 void MovieManager::printAllMovies() const
 {
     // 영화 정보 출력은 Movie의 operator<<를 그대로 활용하는거임
-    for (const Movie &movie : movies)
+    for (const std::unique_ptr<Movie> &movie : movies)
     {
-        std::cout << movie << std::endl;
+        std::cout << *movie << std::endl;
     }
 }
 
 void MovieManager::printMoviesSortedByRating() const
 {
-    std::vector<Movie> sortedMovies = movies;
+    std::vector<const Movie *> sortedMovies;
+    sortedMovies.reserve(movies.size());
 
-    std::sort(sortedMovies.begin(), sortedMovies.end());
-
-    for (const Movie &movie : sortedMovies)
+    for (const std::unique_ptr<Movie> &movie : movies)
     {
-        std::cout << movie << std::endl;
+        sortedMovies.push_back(movie.get());
+    }
+
+    std::sort(sortedMovies.begin(), sortedMovies.end(),
+              [](const Movie *left, const Movie *right)
+              {
+                  return *left < *right;
+              });
+
+    for (const Movie *movie : sortedMovies)
+    {
+        std::cout << *movie << std::endl;
     }
 }
 
 void MovieManager::rebuildRatingsFrom(const std::vector<Rating> &ratings)
 {
-    for (Movie &movie : movies)
+    for (const std::unique_ptr<Movie> &movie : movies)
     {
-        movie.resetRatings();
+        movie->resetRatings();
     }
 
     for (const Rating &rating : ratings)
