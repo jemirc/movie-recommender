@@ -2,9 +2,59 @@
 
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <string>
 
 #include "Recommender.h"
+
+namespace
+{
+bool readIntValue(const std::string &prompt, int &value)
+{
+    while (true)
+    {
+        std::string line;
+
+        std::cout << prompt;
+        if (!std::getline(std::cin, line))
+        {
+            return false;
+        }
+
+        std::istringstream input(line);
+        char extra = '\0';
+        if ((input >> value) && !(input >> extra))
+        {
+            return true;
+        }
+
+        std::cout << "정수로 입력해 주세요." << std::endl;
+    }
+}
+
+bool readDoubleValue(const std::string &prompt, double &value)
+{
+    while (true)
+    {
+        std::string line;
+
+        std::cout << prompt;
+        if (!std::getline(std::cin, line))
+        {
+            return false;
+        }
+
+        std::istringstream input(line);
+        char extra = '\0';
+        if ((input >> value) && !(input >> extra))
+        {
+            return true;
+        }
+
+        std::cout << "숫자로 입력해 주세요." << std::endl;
+    }
+}
+}
 
 DisplayManager::DisplayManager(MovieManager &movieManager, UserManager &userManager, RatingManager &ratingManager)
     : movieManager(movieManager), userManager(userManager), ratingManager(ratingManager)
@@ -33,9 +83,17 @@ void DisplayManager::addMovieMenu()
     std::cout << "장르: ";
     std::getline(std::cin, genre);
 
-    std::cout << "개봉 연도: ";
-    std::cin >> year;
-    clearInput();
+    if (!readIntValue("개봉 연도: ", year))
+    {
+        std::cout << "입력이 종료되어 영화 추가를 취소합니다." << std::endl;
+        return;
+    }
+
+    if (year <= 0)
+    {
+        std::cout << "개봉 연도는 1 이상의 숫자로 입력해 주세요." << std::endl;
+        return;
+    }
 
     int id = movieManager.addMovie(title, genre, year);
     std::cout << "영화가 추가되었습니다. 영화 ID: " << id << std::endl;
@@ -124,13 +182,15 @@ void DisplayManager::addRatingMenu()
     int movieId = 0;
     double score = 0.0;
 
-    std::cout << "사용자 ID: ";
-    std::cin >> userId;
-    std::cout << "영화 ID: ";
-    std::cin >> movieId;
-    std::cout << "평점(0.0 ~ 5.0): ";
-    std::cin >> score;
     clearInput();
+
+    if (!readIntValue("사용자 ID: ", userId) ||
+        !readIntValue("영화 ID: ", movieId) ||
+        !readDoubleValue("평점(0.0 ~ 5.0): ", score))
+    {
+        std::cout << "입력이 종료되어 평점 등록을 취소합니다." << std::endl;
+        return;
+    }
 
     if (ratingManager.addRating(userId, movieId, score, userManager, movieManager))
     {
@@ -153,9 +213,13 @@ void DisplayManager::printMovieRatingsMenu() const
     // 영화가 있는지 먼저 확인하고, 있으면 해당 영화 평점 목록 출력하는거임
     int movieId = 0;
 
-    std::cout << "조회할 영화 ID: ";
-    std::cin >> movieId;
     clearInput();
+
+    if (!readIntValue("조회할 영화 ID: ", movieId))
+    {
+        std::cout << "입력이 종료되어 조회를 취소합니다." << std::endl;
+        return;
+    }
 
     const Movie *movie = movieManager.findMovieById(movieId);
     if (movie == nullptr)
@@ -180,9 +244,13 @@ void DisplayManager::recommendMovieMenu() const
 {
     int userId = 0;
 
-    std::cout << "추천받을 사용자 ID: ";
-    std::cin >> userId;
     clearInput();
+
+    if (!readIntValue("추천받을 사용자 ID: ", userId))
+    {
+        std::cout << "입력이 종료되어 추천을 취소합니다." << std::endl;
+        return;
+    }
 
     if (userManager.findUserById(userId) == nullptr)
     {

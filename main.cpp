@@ -55,6 +55,11 @@ int main()
 
         if (!(std::cin >> menu))
         {
+            if (std::cin.eof())
+            {
+                break;
+            }
+
             clearInput();
             continue;
         }

@@ -29,6 +29,7 @@ void RatingManager::loadFromFile(const std::string &filename)
     std::ifstream file(filename);
     if (!file.is_open())
     {
+        std::cerr << "평점 CSV 파일을 열 수 없습니다: " << filename << std::endl;
         return;
     }
 
@@ -72,6 +73,7 @@ void RatingManager::saveToFile(const std::string &filename) const
     std::ofstream file(filename);
     if (!file.is_open())
     {
+        std::cerr << "평점 CSV 파일을 저장할 수 없습니다: " << filename << std::endl;
         return;
     }
 
