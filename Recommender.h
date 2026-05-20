@@ -16,5 +16,5 @@ private:
 public:
     Recommender(const MovieManager &movieManager, const RatingManager &ratingManager);
 
-    std::vector<std::pair<const Movie *, int>> recommend(int userId, int topKUsers = 3, int topNMovies = 5) const;
+    std::vector<std::pair<const Movie *, double>> recommend(int userId, int topKUsers = 3, int topNMovies = 5) const;
 };

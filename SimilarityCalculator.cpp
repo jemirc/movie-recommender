@@ -2,10 +2,10 @@
 
 #include <cmath>
 
-int SimilarityCalculator::calculate(const std::vector<Rating> &ratingsA, const std::vector<Rating> &ratingsB)
+double SimilarityCalculator::calculate(const std::vector<Rating> &ratingsA, const std::vector<Rating> &ratingsB)
 {
     int commonCount = 0;
-    int scoreDiffSum = 0;
+    double scoreDiffSum = 0.0;
 
     for (const Rating &ratingA : ratingsA)
     {
@@ -14,17 +14,15 @@ int SimilarityCalculator::calculate(const std::vector<Rating> &ratingsA, const s
             if (ratingA.getMovieId() == ratingB.getMovieId())
             {
                 commonCount++;
-
-                const int diff = static_cast<int>(std::abs(ratingA.getScore() - ratingB.getScore()));
-                scoreDiffSum += diff;
+                scoreDiffSum += std::abs(ratingA.getScore() - ratingB.getScore());
             }
         }
     }
 
     if (commonCount == 0)
     {
-        return -100;
+        return -100.0;
     }
 
-    return commonCount * 10 - scoreDiffSum;
+    return commonCount * 10.0 - scoreDiffSum;
 }

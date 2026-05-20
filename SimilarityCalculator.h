@@ -7,5 +7,5 @@
 class SimilarityCalculator
 {
 public:
-    static int calculate(const std::vector<Rating> &ratingsA, const std::vector<Rating> &ratingsB);
+    static double calculate(const std::vector<Rating> &ratingsA, const std::vector<Rating> &ratingsB);
 };
