@@ -1,3 +1,4 @@
 *.o
+*.d
 /tests
 movie_recommender
