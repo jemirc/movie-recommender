@@ -11,9 +11,9 @@ int main()
     MovieManager movieManager;
     UserManager userManager;
     RatingManager ratingManager;
-    movieManager.loadFromFile("data/movies.csv");
-    userManager.loadFromFile("data/users.csv");
-    ratingManager.loadFromFile("data/ratings.csv");
+    movieManager.loadFromFile("data/movie.csv");
+    userManager.loadFromFile("data/user.csv");
+    ratingManager.loadFromFile("data/rating.csv");
     movieManager.rebuildRatingsFrom(ratingManager.getAllRatings());
     DisplayManager displayManager(movieManager, userManager, ratingManager);
     int menu = -1;
@@ -103,9 +103,9 @@ int main()
         }
     }
 
-    movieManager.saveToFile("data/movies.csv");
-    userManager.saveToFile("data/users.csv");
-    ratingManager.saveToFile("data/ratings.csv");
+    movieManager.saveToFile("data/movie.csv");
+    userManager.saveToFile("data/user.csv");
+    ratingManager.saveToFile("data/rating.csv");
 
     return 0;
 }
