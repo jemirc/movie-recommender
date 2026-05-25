@@ -194,6 +194,8 @@ void DisplayManager::addRatingMenu()
 
     if (ratingManager.addRating(userId, movieId, score, userManager, movieManager))
     {
+        movieManager.rebuildRatingsFrom(ratingManager.getAllRatings());
+
         if (ratingManager.wasLastRatingUpdated())
         {
             std::cout << "기존 평점이 수정되었습니다." << std::endl;

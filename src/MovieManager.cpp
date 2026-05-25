@@ -4,7 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <sstream>
+
+#include "CsvUtils.h"
 
 namespace
 {
@@ -49,24 +50,18 @@ void MovieManager::loadFromFile(const std::string &filename)
             continue;
         }
 
-        std::stringstream ss(line);
-        std::string idText;
-        std::string title;
-        std::string genre;
-        std::string yearText;
-
-        if (!std::getline(ss, idText, ',') ||
-            !std::getline(ss, title, ',') ||
-            !std::getline(ss, genre, ',') ||
-            !std::getline(ss, yearText))
+        std::vector<std::string> fields;
+        if (!CsvUtils::parseLine(line, fields) || fields.size() != 4)
         {
             continue;
         }
 
         try
         {
-            const int id = std::stoi(idText);
-            const int year = std::stoi(yearText);
+            const int id = std::stoi(fields[0]);
+            const int year = std::stoi(fields[3]);
+            const std::string &title = fields[1];
+            const std::string &genre = fields[2];
             movies.push_back(std::make_unique<Movie>(id, title, genre, year));
 
             if (id > maxId)
@@ -94,10 +89,11 @@ void MovieManager::saveToFile(const std::string &filename) const
 
     for (const std::unique_ptr<Movie> &movie : movies)
     {
-        file << movie->getId() << ','
-             << movie->getTitle() << ','
-             << movie->getGenre() << ','
-             << movie->getReleaseYear() << '\n';
+        file << CsvUtils::makeLine({std::to_string(movie->getId()),
+                                    movie->getTitle(),
+                                    movie->getGenre(),
+                                    std::to_string(movie->getReleaseYear())})
+             << '\n';
     }
 }
 

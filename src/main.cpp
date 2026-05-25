@@ -6,14 +6,21 @@
 #include "RatingManager.h"
 #include "UserManager.h"
 
+namespace
+{
+const char *MOVIE_FILE = "data/movie.csv";
+const char *USER_FILE = "data/user.csv";
+const char *RATING_FILE = "data/rating.csv";
+}
+
 int main()
 {
     MovieManager movieManager;
     UserManager userManager;
     RatingManager ratingManager;
-    movieManager.loadFromFile("data/movies.csv");
-    userManager.loadFromFile("data/users.csv");
-    ratingManager.loadFromFile("data/ratings.csv");
+    movieManager.loadFromFile(MOVIE_FILE);
+    userManager.loadFromFile(USER_FILE);
+    ratingManager.loadFromFile(RATING_FILE);
     movieManager.rebuildRatingsFrom(ratingManager.getAllRatings());
     DisplayManager displayManager(movieManager, userManager, ratingManager);
     int menu = -1;
@@ -103,9 +110,9 @@ int main()
         }
     }
 
-    movieManager.saveToFile("data/movies.csv");
-    userManager.saveToFile("data/users.csv");
-    ratingManager.saveToFile("data/ratings.csv");
+    movieManager.saveToFile(MOVIE_FILE);
+    userManager.saveToFile(USER_FILE);
+    ratingManager.saveToFile(RATING_FILE);
 
     return 0;
 }

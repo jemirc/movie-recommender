@@ -5,6 +5,7 @@
 #include <set>
 #include <sstream>
 
+#include "CsvUtils.h"
 #include "MovieManager.h"
 #include "UserManager.h"
 
@@ -13,6 +14,13 @@ namespace
 bool shouldSkipLine(const std::string &line)
 {
     return line.empty() || line[0] == '#';
+}
+
+std::string scoreToText(double score)
+{
+    std::ostringstream output;
+    output << score;
+    return output.str();
 }
 }
 
@@ -42,23 +50,17 @@ void RatingManager::loadFromFile(const std::string &filename)
             continue;
         }
 
-        std::stringstream ss(line);
-        std::string userIdText;
-        std::string movieIdText;
-        std::string scoreText;
-
-        if (!std::getline(ss, userIdText, ',') ||
-            !std::getline(ss, movieIdText, ',') ||
-            !std::getline(ss, scoreText))
+        std::vector<std::string> fields;
+        if (!CsvUtils::parseLine(line, fields) || fields.size() != 3)
         {
             continue;
         }
 
         try
         {
-            const int userId = std::stoi(userIdText);
-            const int movieId = std::stoi(movieIdText);
-            const double score = std::stod(scoreText);
+            const int userId = std::stoi(fields[0]);
+            const int movieId = std::stoi(fields[1]);
+            const double score = std::stod(fields[2]);
             ratings.push_back(Rating(userId, movieId, score));
         }
         catch (const std::exception &)
@@ -79,9 +81,10 @@ void RatingManager::saveToFile(const std::string &filename) const
 
     for (const Rating &rating : ratings)
     {
-        file << rating.getUserId() << ','
-             << rating.getMovieId() << ','
-             << rating.getScore() << '\n';
+        file << CsvUtils::makeLine({std::to_string(rating.getUserId()),
+                                    std::to_string(rating.getMovieId()),
+                                    scoreToText(rating.getScore())})
+             << '\n';
     }
 }
 
@@ -90,7 +93,7 @@ std::size_t RatingManager::size() const
     return ratings.size();
 }
 
-bool RatingManager::addRating(int userId, int movieId, double score, const UserManager &userManager, MovieManager &movieManager)
+bool RatingManager::addRating(int userId, int movieId, double score, const UserManager &userManager, const MovieManager &movieManager)
 {
     lastRatingUpdated = false;
 
@@ -104,7 +107,7 @@ bool RatingManager::addRating(int userId, int movieId, double score, const UserM
         return false;
     }
 
-    Movie *movie = movieManager.findMovieById(movieId);
+    const Movie *movie = movieManager.findMovieById(movieId);
     if (movie == nullptr)
     {
         return false;
@@ -117,9 +120,7 @@ bool RatingManager::addRating(int userId, int movieId, double score, const UserM
     {
         if (rating == newRating)
         {
-            const double oldScore = rating.getScore();
-            // 영화의 평점 업데이트와 Rating 객체의 점수 업데이트 둘 다 성공해야 true 반환, 하나라도 실패하면 false 반환
-            if (!movie->updateRating(oldScore, score) || !rating.setScore(score))
+            if (!rating.setScore(score))
             {
                 return false;
             }
@@ -131,7 +132,6 @@ bool RatingManager::addRating(int userId, int movieId, double score, const UserM
 
     // 없으면 새로 추가
     ratings.push_back(newRating);
-    movie->addRating(newRating.getScore());
     return true;
 }
 

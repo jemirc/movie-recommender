@@ -2,7 +2,8 @@
 
 #include <fstream>
 #include <iostream>
-#include <sstream>
+
+#include "CsvUtils.h"
 
 namespace
 {
@@ -47,22 +48,16 @@ void UserManager::loadFromFile(const std::string &filename)
             continue;
         }
 
-        std::stringstream ss(line);
-        std::string idText;
-        std::string name;
-        std::string email;
-
-        if (!std::getline(ss, idText, ',') ||
-            !std::getline(ss, name, ',') ||
-            !std::getline(ss, email))
+        std::vector<std::string> fields;
+        if (!CsvUtils::parseLine(line, fields) || fields.size() != 3)
         {
             continue;
         }
 
         try
         {
-            const int id = std::stoi(idText);
-            users.push_back(User(id, name, email));
+            const int id = std::stoi(fields[0]);
+            users.push_back(User(id, fields[1], fields[2]));
 
             if (id > maxId)
             {
@@ -89,9 +84,10 @@ void UserManager::saveToFile(const std::string &filename) const
 
     for (const User &user : users)
     {
-        file << user.getId() << ','
-             << user.getName() << ','
-             << user.getEmail() << '\n';
+        file << CsvUtils::makeLine({std::to_string(user.getId()),
+                                    user.getName(),
+                                    user.getEmail()})
+             << '\n';
     }
 }
 

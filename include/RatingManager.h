@@ -19,7 +19,7 @@ private:
 public:
     RatingManager();
 
-    bool addRating(int userId, int movieId, double score, const UserManager &userManager, MovieManager &movieManager);
+    bool addRating(int userId, int movieId, double score, const UserManager &userManager, const MovieManager &movieManager);
     void loadFromFile(const std::string &filename) override;
     void saveToFile(const std::string &filename) const override;
     std::size_t size() const override;
