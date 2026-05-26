@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 
+#include "MovieConstants.h"
 #include "Recommender.h"
 
 namespace
@@ -181,12 +182,16 @@ void DisplayManager::addRatingMenu()
     int userId = 0;
     int movieId = 0;
     double score = 0.0;
+    std::ostringstream scorePrompt;
+
+    scorePrompt << "평점(" << MovieConstants::MIN_RATING_SCORE
+                << " ~ " << MovieConstants::MAX_RATING_SCORE << "): ";
 
     clearInput();
 
     if (!readIntValue("사용자 ID: ", userId) ||
         !readIntValue("영화 ID: ", movieId) ||
-        !readDoubleValue("평점(0.0 ~ 5.0): ", score))
+        !readDoubleValue(scorePrompt.str(), score))
     {
         std::cout << "입력이 종료되어 평점 등록을 취소합니다." << std::endl;
         return;
@@ -265,7 +270,9 @@ void DisplayManager::recommendMovieMenu() const
     }
 
     Recommender recommender(movieManager, ratingManager);
-    const auto recommendations = recommender.recommend(userId, 3, 5);
+    const auto recommendations = recommender.recommend(userId,
+                                                       MovieConstants::DEFAULT_TOP_K_USERS,
+                                                       MovieConstants::DEFAULT_TOP_N_MOVIES);
 
     if (recommendations.empty())
     {

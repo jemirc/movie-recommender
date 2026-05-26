@@ -1,6 +1,8 @@
 #include "Rating.h"
 #include <iostream>
 
+#include "MovieConstants.h"
+
 using namespace std;
 Rating::Rating(int userId, int movieId, double score)
     : userId(userId), movieId(movieId), score(score) {}
@@ -22,7 +24,7 @@ int Rating::getMovieId() const
 
 bool Rating::setScore(double score)
 {
-    if (score < 0.0 || score > 5.0)
+    if (score < MovieConstants::MIN_RATING_SCORE || score > MovieConstants::MAX_RATING_SCORE)
     {
         return false;
     }

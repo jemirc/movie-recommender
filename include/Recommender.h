@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Movie.h"
+#include "MovieConstants.h"
 #include "MovieManager.h"
 #include "RatingManager.h"
 
@@ -16,5 +17,7 @@ private:
 public:
     Recommender(const MovieManager &movieManager, const RatingManager &ratingManager);
 
-    std::vector<std::pair<const Movie *, double>> recommend(int userId, int topKUsers = 3, int topNMovies = 5) const;
+    std::vector<std::pair<const Movie *, double>> recommend(int userId,
+                                                            int topKUsers = MovieConstants::DEFAULT_TOP_K_USERS,
+                                                            int topNMovies = MovieConstants::DEFAULT_TOP_N_MOVIES) const;
 };
