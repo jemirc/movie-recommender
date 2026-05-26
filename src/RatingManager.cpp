@@ -4,7 +4,9 @@
 #include <iostream>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 
+#include "MovieConstants.h"
 #include "MovieManager.h"
 #include "UserManager.h"
 
@@ -13,6 +15,33 @@ namespace
 bool shouldSkipLine(const std::string &line)
 {
     return line.empty() || line[0] == '#';
+}
+
+Rating parseRatingLine(const std::string &line)
+{
+    std::stringstream ss(line);
+    std::string userIdText;
+    std::string movieIdText;
+    std::string scoreText;
+    std::string extraText;
+
+    if (!std::getline(ss, userIdText, ',') ||
+        !std::getline(ss, movieIdText, ',') ||
+        !std::getline(ss, scoreText, ',') ||
+        std::getline(ss, extraText, ','))
+    {
+        throw std::invalid_argument("평점 CSV는 " + std::to_string(MovieConstants::RATING_CSV_FIELD_COUNT) + "개 값이어야 합니다");
+    }
+
+    const int userId = std::stoi(userIdText);
+    const int movieId = std::stoi(movieIdText);
+    const double score = std::stod(scoreText);
+    if (score < MovieConstants::MIN_RATING_SCORE || score > MovieConstants::MAX_RATING_SCORE)
+    {
+        throw std::invalid_argument("평점 범위가 올바르지 않습니다");
+    }
+
+    return Rating(userId, movieId, score);
 }
 }
 
@@ -29,41 +58,28 @@ void RatingManager::loadFromFile(const std::string &filename)
     std::ifstream file(filename);
     if (!file.is_open())
     {
-        std::cerr << "평점 CSV 파일을 열 수 없습니다: " << filename << std::endl;
-        return;
+        throw std::runtime_error("평점 CSV 파일을 열 수 없습니다: " + filename);
     }
 
     std::string line;
+    int lineNumber = 0;
 
     while (std::getline(file, line))
     {
+        lineNumber++;
+
         if (shouldSkipLine(line))
-        {
-            continue;
-        }
-
-        std::stringstream ss(line);
-        std::string userIdText;
-        std::string movieIdText;
-        std::string scoreText;
-
-        if (!std::getline(ss, userIdText, ',') ||
-            !std::getline(ss, movieIdText, ',') ||
-            !std::getline(ss, scoreText))
         {
             continue;
         }
 
         try
         {
-            const int userId = std::stoi(userIdText);
-            const int movieId = std::stoi(movieIdText);
-            const double score = std::stod(scoreText);
-            ratings.push_back(Rating(userId, movieId, score));
+            ratings.push_back(parseRatingLine(line));
         }
-        catch (const std::exception &)
+        catch (const std::exception &e)
         {
-            continue;
+            std::cerr << filename << " " << lineNumber << "번 줄 건너뜀: " << e.what() << std::endl;
         }
     }
 }
@@ -73,8 +89,7 @@ void RatingManager::saveToFile(const std::string &filename) const
     std::ofstream file(filename);
     if (!file.is_open())
     {
-        std::cerr << "평점 CSV 파일을 저장할 수 없습니다: " << filename << std::endl;
-        return;
+        throw std::runtime_error("평점 CSV 파일을 저장할 수 없습니다: " + filename);
     }
 
     for (const Rating &rating : ratings)
@@ -94,7 +109,7 @@ bool RatingManager::addRating(int userId, int movieId, double score, const UserM
 {
     lastRatingUpdated = false;
 
-    if (score < 0.0 || score > 5.0)
+    if (score < MovieConstants::MIN_RATING_SCORE || score > MovieConstants::MAX_RATING_SCORE)
     {
         return false;
     }

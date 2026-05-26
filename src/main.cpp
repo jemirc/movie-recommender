@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <limits>
 
@@ -11,10 +13,21 @@ int main()
     MovieManager movieManager;
     UserManager userManager;
     RatingManager ratingManager;
-    movieManager.loadFromFile("data/movie.csv");
-    userManager.loadFromFile("data/user.csv");
-    ratingManager.loadFromFile("data/rating.csv");
-    movieManager.rebuildRatingsFrom(ratingManager.getAllRatings());
+
+    // 파일 자체를 못 열면 매니저에서 예외를 던지고, main에서 한 번만 잡는거임
+    try
+    {
+        movieManager.loadFromFile("data/movie.csv");
+        userManager.loadFromFile("data/user.csv");
+        ratingManager.loadFromFile("data/rating.csv");
+        movieManager.rebuildRatingsFrom(ratingManager.getAllRatings());
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "초기 데이터 로딩 실패: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
     DisplayManager displayManager(movieManager, userManager, ratingManager);
     int menu = -1;
     bool isRunning = true;
@@ -103,9 +116,18 @@ int main()
         }
     }
 
-    movieManager.saveToFile("data/movie.csv");
-    userManager.saveToFile("data/user.csv");
-    ratingManager.saveToFile("data/rating.csv");
+    // 저장도 파일을 못 열 수 있으니까 종료 직전에 한 번 더 예외를 잡는거임
+    try
+    {
+        movieManager.saveToFile("data/movie.csv");
+        userManager.saveToFile("data/user.csv");
+        ratingManager.saveToFile("data/rating.csv");
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "데이터 저장 실패: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

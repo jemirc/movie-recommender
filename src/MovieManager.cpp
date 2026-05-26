@@ -5,12 +5,44 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
+#include <utility>
+
+#include "MovieConstants.h"
 
 namespace
 {
 bool shouldSkipLine(const std::string &line)
 {
     return line.empty() || line[0] == '#';
+}
+
+std::unique_ptr<Movie> parseMovieLine(const std::string &line)
+{
+    std::stringstream ss(line);
+    std::string idText;
+    std::string title;
+    std::string genre;
+    std::string yearText;
+    std::string extraText;
+
+    if (!std::getline(ss, idText, ',') ||
+        !std::getline(ss, title, ',') ||
+        !std::getline(ss, genre, ',') ||
+        !std::getline(ss, yearText, ',') ||
+        std::getline(ss, extraText, ','))
+    {
+        throw std::invalid_argument("영화 CSV는 " + std::to_string(MovieConstants::MOVIE_CSV_FIELD_COUNT) + "개 값이어야 합니다");
+    }
+
+    const int id = std::stoi(idText);
+    const int year = std::stoi(yearText);
+    if (year < MovieConstants::MIN_RELEASE_YEAR)
+    {
+        throw std::invalid_argument("개봉 연도는 " + std::to_string(MovieConstants::MIN_RELEASE_YEAR) + " 이상이어야 합니다");
+    }
+
+    return std::make_unique<Movie>(id, title, genre, year);
 }
 }
 
@@ -35,48 +67,36 @@ void MovieManager::loadFromFile(const std::string &filename)
     std::ifstream file(filename);
     if (!file.is_open())
     {
-        std::cerr << "영화 CSV 파일을 열 수 없습니다: " << filename << std::endl;
-        return;
+        throw std::runtime_error("영화 CSV 파일을 열 수 없습니다: " + filename);
     }
 
     std::string line;
+    int lineNumber = 0;
     int maxId = 0;
 
     while (std::getline(file, line))
     {
+        lineNumber++;
+
         if (shouldSkipLine(line))
-        {
-            continue;
-        }
-
-        std::stringstream ss(line);
-        std::string idText;
-        std::string title;
-        std::string genre;
-        std::string yearText;
-
-        if (!std::getline(ss, idText, ',') ||
-            !std::getline(ss, title, ',') ||
-            !std::getline(ss, genre, ',') ||
-            !std::getline(ss, yearText))
         {
             continue;
         }
 
         try
         {
-            const int id = std::stoi(idText);
-            const int year = std::stoi(yearText);
-            movies.push_back(std::make_unique<Movie>(id, title, genre, year));
+            std::unique_ptr<Movie> movie = parseMovieLine(line);
+            const int id = movie->getId();
+            movies.push_back(std::move(movie));
 
             if (id > maxId)
             {
                 maxId = id;
             }
         }
-        catch (const std::exception &)
+        catch (const std::exception &e)
         {
-            continue;
+            std::cerr << filename << " " << lineNumber << "번 줄 건너뜀: " << e.what() << std::endl;
         }
     }
 
@@ -88,8 +108,7 @@ void MovieManager::saveToFile(const std::string &filename) const
     std::ofstream file(filename);
     if (!file.is_open())
     {
-        std::cerr << "영화 CSV 파일을 저장할 수 없습니다: " << filename << std::endl;
-        return;
+        throw std::runtime_error("영화 CSV 파일을 저장할 수 없습니다: " + filename);
     }
 
     for (const std::unique_ptr<Movie> &movie : movies)
