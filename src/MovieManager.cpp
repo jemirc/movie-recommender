@@ -4,7 +4,9 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <memory>
+#include <numeric>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -188,6 +190,93 @@ std::vector<const Movie *> MovieManager::filterMoviesByGenre(const std::string &
                  });
 
     return matchedMovies;
+}
+
+double MovieManager::getAverageRating() const
+{
+    const int totalRatingCount = std::accumulate(movies.begin(), movies.end(), 0,
+                                                 [](int total, const std::unique_ptr<Movie> &movie)
+                                                 {
+                                                     return total + movie->getRatingCount();
+                                                 });
+
+    if (totalRatingCount == 0)
+    {
+        throw std::runtime_error("등록된 평점이 없습니다");
+    }
+
+    const double totalScore = std::accumulate(movies.begin(), movies.end(), 0.0,
+                                              [](double total, const std::unique_ptr<Movie> &movie)
+                                              {
+                                                  return total + movie->getAverageRating() * movie->getRatingCount();
+                                              });
+
+    return totalScore / totalRatingCount;
+}
+
+std::map<std::string, GenreStatistics> MovieManager::getGenreStatistics() const
+{
+    std::map<std::string, GenreStatistics> statisticsByGenre;
+    std::map<std::string, double> scoreSumByGenre;
+
+    for (const std::unique_ptr<Movie> &movie : movies)
+    {
+        GenreStatistics &statistics = statisticsByGenre[movie->getGenre()];
+        statistics.movieCount++;
+        statistics.ratingCount += movie->getRatingCount();
+        scoreSumByGenre[movie->getGenre()] += movie->getAverageRating() * movie->getRatingCount();
+    }
+
+    for (auto &[genre, statistics] : statisticsByGenre)
+    {
+        if (statistics.ratingCount > 0)
+        {
+            statistics.averageRating = scoreSumByGenre[genre] / statistics.ratingCount;
+        }
+    }
+
+    return statisticsByGenre;
+}
+
+std::vector<const Movie *> MovieManager::getTopRatedMovies(int limit) const
+{
+    std::vector<const Movie *> sortedMovies;
+
+    if (limit <= 0)
+    {
+        return sortedMovies;
+    }
+
+    for (const std::unique_ptr<Movie> &movie : movies)
+    {
+        if (movie->getRatingCount() > 0)
+        {
+            sortedMovies.push_back(movie.get());
+        }
+    }
+
+    std::sort(sortedMovies.begin(), sortedMovies.end(),
+              [](const Movie *left, const Movie *right)
+              {
+                  if (left->getAverageRating() != right->getAverageRating())
+                  {
+                      return left->getAverageRating() > right->getAverageRating();
+                  }
+
+                  if (left->getRatingCount() != right->getRatingCount())
+                  {
+                      return left->getRatingCount() > right->getRatingCount();
+                  }
+
+                  return left->getId() < right->getId();
+              });
+
+    if (static_cast<int>(sortedMovies.size()) > limit)
+    {
+        sortedMovies.resize(limit);
+    }
+
+    return sortedMovies;
 }
 
 void MovieManager::printAllMovies() const

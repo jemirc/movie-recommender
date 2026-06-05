@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -8,6 +9,13 @@
 #include "BaseManager.h"
 #include "Movie.h"
 #include "Rating.h"
+
+struct GenreStatistics
+{
+    int movieCount = 0;
+    int ratingCount = 0;
+    double averageRating = 0.0;
+};
 
 // Movie 객체 여러개를 한곳에서 관리하려고 만든 클래스
 class MovieManager : public BaseManager
@@ -27,6 +35,9 @@ public:
     const Movie *findMovieById(int id) const;                                         // 읽기 전용으로 찾을때
     std::vector<const Movie *> searchMoviesByTitle(const std::string &keyword) const; // 제목에 키워드가 들어가는 영화들 찾기
     std::vector<const Movie *> filterMoviesByGenre(const std::string &genre) const;   // 장르가 같은 영화만 찾기
+    double getAverageRating() const;                                                  // 전체 평점 평균 계산
+    std::map<std::string, GenreStatistics> getGenreStatistics() const;                // 장르별 영화/평점 통계 계산
+    std::vector<const Movie *> getTopRatedMovies(int limit) const;                    // 평균 평점 상위 영화 찾기
     void printAllMovies() const;                                                      // 전체 영화 목록 출력
     void printMoviesSortedByRating() const;                                           // 평점순으로 정렬해서 출력
     void rebuildRatingsFrom(const std::vector<Rating> &ratings);
