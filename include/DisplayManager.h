@@ -13,6 +13,9 @@ private:
     RatingManager &ratingManager; // 평점 데이터 처리용
 
     void clearInput() const; // cin에 남은 개행이나 잘못된 입력 정리하는 용도
+    void printAverageRatingStatistics() const;
+    void printGenreStatistics() const;
+    void printTopRatedMoviesStatistics() const;
 
 public:
     DisplayManager(MovieManager &movieManager, UserManager &userManager, RatingManager &ratingManager);
@@ -27,4 +30,5 @@ public:
     void printMovieRatingsMenu() const; // 8번 메뉴 안쪽 구현
     void recommendMovieMenu() const;    // 9번 메뉴 안쪽 구현
     void recommendMovieByGenreMenu() const; // 10번 메뉴 안쪽 구현
+    void showStatisticsMenu() const;    // 11번 메뉴 안쪽 구현
 };

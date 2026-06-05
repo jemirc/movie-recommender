@@ -1,5 +1,7 @@
 #include "DisplayManager.h"
 
+#include <exception>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -54,6 +56,13 @@ bool readDoubleValue(const std::string &prompt, double &value)
 
         std::cout << "숫자로 입력해 주세요." << std::endl;
     }
+}
+
+std::string formatRating(double rating)
+{
+    std::ostringstream output;
+    output << std::fixed << std::setprecision(2) << rating;
+    return output.str();
 }
 }
 
@@ -343,5 +352,127 @@ void DisplayManager::recommendMovieByGenreMenu() const
     for (const auto &[movie, score] : recommendations)
     {
         std::cout << *movie << " | 추천 점수: " << score << std::endl;
+    }
+}
+
+void DisplayManager::showStatisticsMenu() const
+{
+    int menu = -1;
+    bool isRunning = true;
+
+    clearInput();
+
+    while (isRunning)
+    {
+        std::cout << std::endl
+                  << "=== 통계 메뉴 ===" << std::endl;
+        std::cout << "1. 전체 평균 평점" << std::endl;
+        std::cout << "2. 장르별 통계" << std::endl;
+        std::cout << "3. 평점 Top N 영화" << std::endl;
+        std::cout << "0. 돌아가기" << std::endl;
+        std::cout << std::endl;
+
+        if (!readIntValue("선택 > ", menu))
+        {
+            std::cout << "입력이 종료되어 통계 메뉴를 닫습니다." << std::endl;
+            return;
+        }
+
+        try
+        {
+            switch (menu)
+            {
+            case 0:
+                isRunning = false;
+                break;
+            case 1:
+                printAverageRatingStatistics();
+                break;
+            case 2:
+                printGenreStatistics();
+                break;
+            case 3:
+                printTopRatedMoviesStatistics();
+                break;
+            default:
+                std::cout << "올바른 메뉴 번호를 입력해 주세요." << std::endl;
+                break;
+            }
+        }
+        catch (const std::exception &e)
+        {
+            std::cout << "통계를 출력할 수 없습니다: " << e.what() << std::endl;
+        }
+    }
+}
+
+void DisplayManager::printAverageRatingStatistics() const
+{
+    std::cout << "전체 평균 평점: " << formatRating(movieManager.getAverageRating()) << std::endl;
+    std::cout << "전체 평점 수: " << ratingManager.getRatingCount() << "건" << std::endl;
+}
+
+void DisplayManager::printGenreStatistics() const
+{
+    const auto statisticsByGenre = movieManager.getGenreStatistics();
+    std::string popularGenre;
+    int maxRatingCount = 0;
+
+    if (statisticsByGenre.empty())
+    {
+        std::cout << "등록된 영화가 없습니다." << std::endl;
+        return;
+    }
+
+    std::cout << "=== 장르별 통계 ===" << std::endl;
+    for (const auto &[genre, statistics] : statisticsByGenre)
+    {
+        std::cout << genre
+                  << " | 영화 수: " << statistics.movieCount
+                  << " | 평점 수: " << statistics.ratingCount
+                  << "건 | 평균 평점: " << formatRating(statistics.averageRating)
+                  << std::endl;
+
+        if (statistics.ratingCount > maxRatingCount)
+        {
+            popularGenre = genre;
+            maxRatingCount = statistics.ratingCount;
+        }
+    }
+
+    if (!popularGenre.empty())
+    {
+        std::cout << "인기 장르: " << popularGenre
+                  << " (" << maxRatingCount << "건)" << std::endl;
+    }
+}
+
+void DisplayManager::printTopRatedMoviesStatistics() const
+{
+    int limit = 0;
+
+    if (!readIntValue("출력할 영화 수: ", limit))
+    {
+        std::cout << "입력이 종료되어 Top N 출력을 취소합니다." << std::endl;
+        return;
+    }
+
+    if (limit <= 0)
+    {
+        std::cout << "1 이상의 숫자를 입력해 주세요." << std::endl;
+        return;
+    }
+
+    const auto topMovies = movieManager.getTopRatedMovies(limit);
+    if (topMovies.empty())
+    {
+        std::cout << "평점이 등록된 영화가 없습니다." << std::endl;
+        return;
+    }
+
+    std::cout << "=== 평점 Top " << topMovies.size() << " 영화 ===" << std::endl;
+    for (const Movie *movie : topMovies)
+    {
+        std::cout << *movie << std::endl;
     }
 }

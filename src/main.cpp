@@ -63,6 +63,9 @@ int main()
         std::cout << "9. 사용자별 영화 추천" << std::endl
                   << "10. 장르 필터 추천" << std::endl
                   << std::endl;
+        std::cout << "[통계]" << std::endl;
+        std::cout << "11. 통계 보기" << std::endl
+                  << std::endl;
         std::cout << "0. 종료" << std::endl;
         std::cout << std::endl;
         std::cout << "선택 > ";
@@ -113,6 +116,9 @@ int main()
             break;
         case 10:
             displayManager.recommendMovieByGenreMenu();
+            break;
+        case 11:
+            displayManager.showStatisticsMenu();
             break;
         default:
             std::cout << "올바른 메뉴 번호를 입력해 주세요." << std::endl;
