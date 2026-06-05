@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -19,5 +20,6 @@ public:
 
     std::vector<std::pair<const Movie *, double>> recommend(int userId,
                                                             int topKUsers = MovieConstants::DEFAULT_TOP_K_USERS,
-                                                            int topNMovies = MovieConstants::DEFAULT_TOP_N_MOVIES) const;
+                                                            int topNMovies = MovieConstants::DEFAULT_TOP_N_MOVIES,
+                                                            const std::string &genre = "") const;
 };

@@ -26,6 +26,7 @@ public:
     Movie *findMovieById(int id);                                                     // 수정 가능한 영화 찾을때
     const Movie *findMovieById(int id) const;                                         // 읽기 전용으로 찾을때
     std::vector<const Movie *> searchMoviesByTitle(const std::string &keyword) const; // 제목에 키워드가 들어가는 영화들 찾기
+    std::vector<const Movie *> filterMoviesByGenre(const std::string &genre) const;   // 장르가 같은 영화만 찾기
     void printAllMovies() const;                                                      // 전체 영화 목록 출력
     void printMoviesSortedByRating() const;                                           // 평점순으로 정렬해서 출력
     void rebuildRatingsFrom(const std::vector<Rating> &ratings);

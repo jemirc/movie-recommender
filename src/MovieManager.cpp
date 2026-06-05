@@ -3,6 +3,7 @@
 #include <algorithm> // find, sort 같은 알고리즘 함수 쓰려고 넣은거임
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -165,6 +166,26 @@ std::vector<const Movie *> MovieManager::searchMoviesByTitle(const std::string &
             matchedMovies.push_back(movie.get());
         }
     }
+
+    return matchedMovies;
+}
+
+std::vector<const Movie *> MovieManager::filterMoviesByGenre(const std::string &genre) const
+{
+    std::vector<const Movie *> allMovies;
+    std::vector<const Movie *> matchedMovies;
+
+    allMovies.reserve(movies.size());
+    for (const std::unique_ptr<Movie> &movie : movies)
+    {
+        allMovies.push_back(movie.get());
+    }
+
+    std::copy_if(allMovies.begin(), allMovies.end(), std::back_inserter(matchedMovies),
+                 [&genre](const Movie *movie)
+                 {
+                     return movie->getGenre() == genre;
+                 });
 
     return matchedMovies;
 }

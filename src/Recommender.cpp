@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <map>
 #include <set>
+#include <string>
 
 #include "MovieConstants.h"
 #include "SimilarityCalculator.h"
@@ -109,7 +110,8 @@ std::vector<MovieScore> sortMovieScores(const std::map<int, double> &movieScores
 
 std::vector<Recommendation> buildRecommendations(const std::vector<MovieScore> &sortedScores,
                                                  const MovieManager &movieManager,
-                                                 int topNMovies)
+                                                 int topNMovies,
+                                                 const std::string &genre)
 {
     std::vector<Recommendation> recommendations;
 
@@ -122,7 +124,7 @@ std::vector<Recommendation> buildRecommendations(const std::vector<MovieScore> &
         }
 
         const Movie *movie = movieManager.findMovieById(movieId);
-        if (movie != nullptr)
+        if (movie != nullptr && (genre.empty() || movie->getGenre() == genre))
         {
             recommendations.push_back({movie, score});
         }
@@ -137,7 +139,10 @@ Recommender::Recommender(const MovieManager &movieManager, const RatingManager &
 {
 }
 
-std::vector<std::pair<const Movie *, double>> Recommender::recommend(int userId, int topKUsers, int topNMovies) const
+std::vector<std::pair<const Movie *, double>> Recommender::recommend(int userId,
+                                                                     int topKUsers,
+                                                                     int topNMovies,
+                                                                     const std::string &genre) const
 {
     if (topKUsers <= 0 || topNMovies <= 0)
     {
@@ -154,5 +159,5 @@ std::vector<std::pair<const Movie *, double>> Recommender::recommend(int userId,
     const std::vector<UserSimilarity> similarities = calculateUserSimilarities(userId, myRatings, ratingManager);
     const std::map<int, double> movieScores = calculateMovieScores(similarities, myMovieIds, ratingManager, topKUsers);
     const std::vector<MovieScore> sortedScores = sortMovieScores(movieScores);
-    return buildRecommendations(sortedScores, movieManager, topNMovies);
+    return buildRecommendations(sortedScores, movieManager, topNMovies, genre);
 }
