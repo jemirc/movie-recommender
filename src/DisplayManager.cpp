@@ -286,3 +286,62 @@ void DisplayManager::recommendMovieMenu() const
         std::cout << *movie << " | 추천 점수: " << score << std::endl;
     }
 }
+
+void DisplayManager::recommendMovieByGenreMenu() const
+{
+    int userId = 0;
+    std::string genre;
+
+    clearInput();
+
+    if (!readIntValue("추천받을 사용자 ID: ", userId))
+    {
+        std::cout << "입력이 종료되어 추천을 취소합니다." << std::endl;
+        return;
+    }
+
+    std::cout << "추천 장르: ";
+    std::getline(std::cin, genre);
+
+    if (genre.empty())
+    {
+        std::cout << "장르를 입력해 주세요." << std::endl;
+        return;
+    }
+
+    if (userManager.findUserById(userId) == nullptr)
+    {
+        std::cout << "해당 사용자가 없습니다." << std::endl;
+        return;
+    }
+
+    if (ratingManager.findByUser(userId).empty())
+    {
+        std::cout << "해당 사용자의 평점이 없습니다." << std::endl;
+        return;
+    }
+
+    if (movieManager.filterMoviesByGenre(genre).empty())
+    {
+        std::cout << "해당 장르의 영화가 없습니다." << std::endl;
+        return;
+    }
+
+    Recommender recommender(movieManager, ratingManager);
+    const auto recommendations = recommender.recommend(userId,
+                                                       MovieConstants::DEFAULT_TOP_K_USERS,
+                                                       MovieConstants::DEFAULT_TOP_N_MOVIES,
+                                                       genre);
+
+    if (recommendations.empty())
+    {
+        std::cout << "해당 장르에서 추천할 영화가 없습니다." << std::endl;
+        return;
+    }
+
+    std::cout << "=== " << genre << " 추천 영화 ===" << std::endl;
+    for (const auto &[movie, score] : recommendations)
+    {
+        std::cout << *movie << " | 추천 점수: " << score << std::endl;
+    }
+}
