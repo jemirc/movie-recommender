@@ -3,3 +3,4 @@
 /tests
 movie_recommender
 .DS_Store
+outputs/
