@@ -1,5 +1,9 @@
 #pragma once
 
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "MovieManager.h"
 #include "RatingManager.h"
 #include "UserManager.h"
@@ -13,7 +17,10 @@ private:
     RatingManager &ratingManager; // 평점 데이터 처리용
 
     void clearInput() const; // cin에 남은 개행이나 잘못된 입력 정리하는 용도
+    bool readRecommendableUserId(int &userId) const;
     void printAvailableGenres() const;
+    void printRecommendationResults(const std::vector<std::pair<const Movie *, double>> &recommendations,
+                                    const std::string &title) const;
     void printAverageRatingStatistics() const;
     void printGenreStatistics() const;
     void printTopRatedMoviesStatistics() const;
