@@ -41,34 +41,7 @@ int main()
 
     while (isRunning)
     {
-        // 큰 메뉴 화면은 main에서 바로 보여주고, 선택된 번호의 안쪽 처리만 DisplayManager로 넘기는 구조임
-        std::cout << std::endl
-                  << "=== Movie Recommender ===" << std::endl
-                  << std::endl;
-        std::cout << "[영화]" << std::endl;
-        std::cout << "1. 영화 추가" << std::endl;
-        std::cout << "2. 제목으로 검색" << std::endl;
-        std::cout << "3. 전체 목록 출력" << std::endl;
-        std::cout << "4. 평점순 정렬 출력" << std::endl
-                  << std::endl;
-        std::cout << "[사용자]" << std::endl;
-        std::cout << "5. 사용자 추가" << std::endl;
-        std::cout << "6. 사용자 목록 출력" << std::endl
-                  << std::endl;
-        std::cout << "[평점]" << std::endl;
-        std::cout << "7. 평점 입력" << std::endl;
-        std::cout << "8. 영화별 평점 보기" << std::endl
-                  << std::endl;
-        std::cout << "[추천]" << std::endl;
-        std::cout << "9. 사용자별 영화 추천" << std::endl
-                  << "10. 장르 필터 추천" << std::endl
-                  << std::endl;
-        std::cout << "[통계]" << std::endl;
-        std::cout << "11. 통계 보기" << std::endl
-                  << std::endl;
-        std::cout << "0. 종료" << std::endl;
-        std::cout << std::endl;
-        std::cout << "선택 > ";
+        displayManager.printMainMenu();
 
         if (!(std::cin >> menu))
         {

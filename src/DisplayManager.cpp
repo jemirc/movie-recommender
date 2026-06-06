@@ -12,6 +12,36 @@
 
 namespace
 {
+constexpr int DIVIDER_WIDTH = 62;
+
+void printDivider(char fill)
+{
+    std::cout << std::string(DIVIDER_WIDTH, fill) << std::endl;
+}
+
+void printSectionHeader(const std::string &title)
+{
+    std::cout << std::endl;
+    printDivider('=');
+    std::cout << title << std::endl;
+    printDivider('-');
+}
+
+void printInfoMessage(const std::string &message)
+{
+    std::cout << "[안내] " << message << std::endl;
+}
+
+void printSuccessMessage(const std::string &message)
+{
+    std::cout << "[완료] " << message << std::endl;
+}
+
+void printWarningMessage(const std::string &message)
+{
+    std::cout << "[확인] " << message << std::endl;
+}
+
 bool readIntValue(const std::string &prompt, int &value)
 {
     while (true)
@@ -31,7 +61,7 @@ bool readIntValue(const std::string &prompt, int &value)
             return true;
         }
 
-        std::cout << "정수로 입력해 주세요." << std::endl;
+        printWarningMessage("정수로 입력해 주세요.");
     }
 }
 
@@ -54,7 +84,7 @@ bool readDoubleValue(const std::string &prompt, double &value)
             return true;
         }
 
-        std::cout << "숫자로 입력해 주세요." << std::endl;
+        printWarningMessage("숫자로 입력해 주세요.");
     }
 }
 
@@ -78,6 +108,48 @@ void DisplayManager::clearInput() const
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
+void DisplayManager::printMainMenu() const
+{
+    std::cout << std::endl;
+    printDivider('=');
+    std::cout << "Movie Recommender" << std::endl;
+    printDivider('-');
+    std::cout << "현재 데이터  영화 " << movieManager.getMovieCount() << "편"
+              << " | 사용자 " << userManager.getUserCount() << "명"
+              << " | 평점 " << ratingManager.getRatingCount() << "건" << std::endl;
+    printDivider('-');
+
+    std::cout << "[영화]" << std::endl;
+    std::cout << "  1. 영화 추가" << std::endl;
+    std::cout << "  2. 제목으로 검색" << std::endl;
+    std::cout << "  3. 전체 목록 출력" << std::endl;
+    std::cout << "  4. 평점순 정렬 출력" << std::endl
+              << std::endl;
+
+    std::cout << "[사용자]" << std::endl;
+    std::cout << "  5. 사용자 추가" << std::endl;
+    std::cout << "  6. 사용자 목록 출력" << std::endl
+              << std::endl;
+
+    std::cout << "[평점]" << std::endl;
+    std::cout << "  7. 평점 입력" << std::endl;
+    std::cout << "  8. 영화별 평점 보기" << std::endl
+              << std::endl;
+
+    std::cout << "[추천]" << std::endl;
+    std::cout << "  9. 사용자별 영화 추천" << std::endl;
+    std::cout << " 10. 장르 필터 추천" << std::endl
+              << std::endl;
+
+    std::cout << "[통계]" << std::endl;
+    std::cout << " 11. 통계 보기" << std::endl
+              << std::endl;
+
+    std::cout << "  0. 종료" << std::endl;
+    printDivider('=');
+    std::cout << "선택 > ";
+}
+
 void DisplayManager::addMovieMenu()
 {
     // 영화 추가에 필요한 값 입력받고 MovieManager에 실제 추가를 맡기는거임
@@ -85,6 +157,7 @@ void DisplayManager::addMovieMenu()
     std::string title;
     std::string genre;
 
+    printSectionHeader("영화 추가");
     clearInput();
 
     std::cout << "제목: ";
@@ -93,20 +166,26 @@ void DisplayManager::addMovieMenu()
     std::cout << "장르: ";
     std::getline(std::cin, genre);
 
+    if (title.empty() || genre.empty())
+    {
+        printWarningMessage("제목과 장르는 비워둘 수 없습니다.");
+        return;
+    }
+
     if (!readIntValue("개봉 연도: ", year))
     {
-        std::cout << "입력이 종료되어 영화 추가를 취소합니다." << std::endl;
+        printInfoMessage("입력이 종료되어 영화 추가를 취소합니다.");
         return;
     }
 
     if (year <= 0)
     {
-        std::cout << "개봉 연도는 1 이상의 숫자로 입력해 주세요." << std::endl;
+        printWarningMessage("개봉 연도는 1 이상의 숫자로 입력해 주세요.");
         return;
     }
 
     int id = movieManager.addMovie(title, genre, year);
-    std::cout << "영화가 추가되었습니다. 영화 ID: " << id << std::endl;
+    printSuccessMessage("영화가 추가되었습니다. 영화 ID: " + std::to_string(id));
 }
 
 void DisplayManager::searchMovieMenu() const
@@ -114,17 +193,25 @@ void DisplayManager::searchMovieMenu() const
     // 제목 키워드만 입력받고 검색 자체는 MovieManager 검색 함수 쓰는거임
     std::string keyword;
 
+    printSectionHeader("영화 제목 검색");
     std::cout << "검색할 제목 키워드: ";
     clearInput();
     std::getline(std::cin, keyword);
 
-    const auto matchedMovies = movieManager.searchMoviesByTitle(keyword);
-    if (matchedMovies.empty())
+    if (keyword.empty())
     {
-        std::cout << "검색 결과가 없습니다." << std::endl;
+        printWarningMessage("검색어를 입력해 주세요.");
         return;
     }
 
+    const auto matchedMovies = movieManager.searchMoviesByTitle(keyword);
+    if (matchedMovies.empty())
+    {
+        printInfoMessage("검색 결과가 없습니다.");
+        return;
+    }
+
+    std::cout << "검색 결과: " << matchedMovies.size() << "건" << std::endl;
     for (const Movie *movie : matchedMovies)
     {
         std::cout << *movie << std::endl;
@@ -134,21 +221,24 @@ void DisplayManager::searchMovieMenu() const
 void DisplayManager::printAllMoviesMenu() const
 {
     // 비어있을때 메시지만 여기서 처리하고, 실제 출력은 MovieManager한테 맡기는거임
+    printSectionHeader("전체 영화 목록");
     if (movieManager.getMovieCount() == 0)
     {
-        std::cout << "등록된 영화가 없습니다." << std::endl;
+        printInfoMessage("등록된 영화가 없습니다.");
         return;
     }
 
+    std::cout << "총 " << movieManager.getMovieCount() << "편" << std::endl;
     movieManager.printAllMovies();
 }
 
 void DisplayManager::printSortedMoviesMenu() const
 {
     // 평점순 출력도 목록이 있을때만 매니저 출력 함수 호출하는 구조임
+    printSectionHeader("평점순 영화 목록");
     if (movieManager.getMovieCount() == 0)
     {
-        std::cout << "등록된 영화가 없습니다." << std::endl;
+        printInfoMessage("등록된 영화가 없습니다.");
         return;
     }
 
@@ -161,6 +251,7 @@ void DisplayManager::addUserMenu()
     std::string name;
     std::string email;
 
+    printSectionHeader("사용자 추가");
     clearInput();
 
     std::cout << "이름: ";
@@ -169,19 +260,27 @@ void DisplayManager::addUserMenu()
     std::cout << "이메일: ";
     std::getline(std::cin, email);
 
+    if (name.empty() || email.empty())
+    {
+        printWarningMessage("이름과 이메일은 비워둘 수 없습니다.");
+        return;
+    }
+
     int id = userManager.addUser(name, email);
-    std::cout << "사용자가 추가되었습니다. 사용자 ID: " << id << std::endl;
+    printSuccessMessage("사용자가 추가되었습니다. 사용자 ID: " + std::to_string(id));
 }
 
 void DisplayManager::printAllUsersMenu() const
 {
     // 사용자 목록이 비었는지 확인한 뒤 출력은 UserManager 함수 재사용
+    printSectionHeader("사용자 목록");
     if (userManager.getUserCount() == 0)
     {
-        std::cout << "등록된 사용자가 없습니다." << std::endl;
+        printInfoMessage("등록된 사용자가 없습니다.");
         return;
     }
 
+    std::cout << "총 " << userManager.getUserCount() << "명" << std::endl;
     userManager.printAllUsers();
 }
 
@@ -196,13 +295,15 @@ void DisplayManager::addRatingMenu()
     scorePrompt << "평점(" << MovieConstants::MIN_RATING_SCORE
                 << " ~ " << MovieConstants::MAX_RATING_SCORE << "): ";
 
+    printSectionHeader("평점 입력");
+    printInfoMessage("사용자 ID와 영화 ID를 확인한 뒤 평점을 입력하세요.");
     clearInput();
 
     if (!readIntValue("사용자 ID: ", userId) ||
         !readIntValue("영화 ID: ", movieId) ||
         !readDoubleValue(scorePrompt.str(), score))
     {
-        std::cout << "입력이 종료되어 평점 등록을 취소합니다." << std::endl;
+        printInfoMessage("입력이 종료되어 평점 등록을 취소합니다.");
         return;
     }
 
@@ -210,16 +311,16 @@ void DisplayManager::addRatingMenu()
     {
         if (ratingManager.wasLastRatingUpdated())
         {
-            std::cout << "기존 평점이 수정되었습니다." << std::endl;
+            printSuccessMessage("기존 평점이 수정되었습니다.");
         }
         else
         {
-            std::cout << "평점이 등록되었습니다." << std::endl;
+            printSuccessMessage("평점이 등록되었습니다.");
         }
         return;
     }
 
-    std::cout << "평점을 등록할 수 없습니다. 사용자/영화 ID와 평점 범위를 확인하세요." << std::endl;
+    printWarningMessage("평점을 등록할 수 없습니다. 사용자/영화 ID와 평점 범위를 확인하세요.");
 }
 
 void DisplayManager::printMovieRatingsMenu() const
@@ -227,18 +328,19 @@ void DisplayManager::printMovieRatingsMenu() const
     // 영화가 있는지 먼저 확인하고, 있으면 해당 영화 평점 목록 출력하는거임
     int movieId = 0;
 
+    printSectionHeader("영화별 평점 보기");
     clearInput();
 
     if (!readIntValue("조회할 영화 ID: ", movieId))
     {
-        std::cout << "입력이 종료되어 조회를 취소합니다." << std::endl;
+        printInfoMessage("입력이 종료되어 조회를 취소합니다.");
         return;
     }
 
     const Movie *movie = movieManager.findMovieById(movieId);
     if (movie == nullptr)
     {
-        std::cout << "해당 영화가 존재하지 않습니다." << std::endl;
+        printWarningMessage("해당 영화가 존재하지 않습니다.");
         return;
     }
 
@@ -247,10 +349,11 @@ void DisplayManager::printMovieRatingsMenu() const
     const auto matchedRatings = ratingManager.getRatingsByMovieId(movieId);
     if (matchedRatings.empty())
     {
-        std::cout << "등록된 평점이 없습니다." << std::endl;
+        printInfoMessage("등록된 평점이 없습니다.");
         return;
     }
 
+    std::cout << "평점 " << matchedRatings.size() << "건" << std::endl;
     ratingManager.printRatingsByMovieId(movieId);
 }
 
@@ -258,23 +361,24 @@ void DisplayManager::recommendMovieMenu() const
 {
     int userId = 0;
 
+    printSectionHeader("사용자별 영화 추천");
     clearInput();
 
     if (!readIntValue("추천받을 사용자 ID: ", userId))
     {
-        std::cout << "입력이 종료되어 추천을 취소합니다." << std::endl;
+        printInfoMessage("입력이 종료되어 추천을 취소합니다.");
         return;
     }
 
     if (userManager.findUserById(userId) == nullptr)
     {
-        std::cout << "해당 사용자가 없습니다." << std::endl;
+        printWarningMessage("해당 사용자가 없습니다.");
         return;
     }
 
     if (ratingManager.findByUser(userId).empty())
     {
-        std::cout << "해당 사용자의 평점이 없습니다." << std::endl;
+        printInfoMessage("해당 사용자의 평점이 없습니다.");
         return;
     }
 
@@ -285,14 +389,14 @@ void DisplayManager::recommendMovieMenu() const
 
     if (recommendations.empty())
     {
-        std::cout << "추천할 영화가 없습니다." << std::endl;
+        printInfoMessage("추천할 영화가 없습니다.");
         return;
     }
 
-    std::cout << "=== 추천 영화 ===" << std::endl;
+    std::cout << "추천 결과: " << recommendations.size() << "편" << std::endl;
     for (const auto &[movie, score] : recommendations)
     {
-        std::cout << *movie << " | 추천 점수: " << score << std::endl;
+        std::cout << *movie << " | 추천 점수: " << formatRating(score) << std::endl;
     }
 }
 
@@ -301,38 +405,40 @@ void DisplayManager::recommendMovieByGenreMenu() const
     int userId = 0;
     std::string genre;
 
+    printSectionHeader("장르 필터 추천");
     clearInput();
 
     if (!readIntValue("추천받을 사용자 ID: ", userId))
     {
-        std::cout << "입력이 종료되어 추천을 취소합니다." << std::endl;
+        printInfoMessage("입력이 종료되어 추천을 취소합니다.");
         return;
     }
 
+    printAvailableGenres();
     std::cout << "추천 장르: ";
     std::getline(std::cin, genre);
 
     if (genre.empty())
     {
-        std::cout << "장르를 입력해 주세요." << std::endl;
+        printWarningMessage("장르를 입력해 주세요.");
         return;
     }
 
     if (userManager.findUserById(userId) == nullptr)
     {
-        std::cout << "해당 사용자가 없습니다." << std::endl;
+        printWarningMessage("해당 사용자가 없습니다.");
         return;
     }
 
     if (ratingManager.findByUser(userId).empty())
     {
-        std::cout << "해당 사용자의 평점이 없습니다." << std::endl;
+        printInfoMessage("해당 사용자의 평점이 없습니다.");
         return;
     }
 
     if (movieManager.filterMoviesByGenre(genre).empty())
     {
-        std::cout << "해당 장르의 영화가 없습니다." << std::endl;
+        printWarningMessage("해당 장르의 영화가 없습니다.");
         return;
     }
 
@@ -344,15 +450,39 @@ void DisplayManager::recommendMovieByGenreMenu() const
 
     if (recommendations.empty())
     {
-        std::cout << "해당 장르에서 추천할 영화가 없습니다." << std::endl;
+        printInfoMessage("해당 장르에서 추천할 영화가 없습니다.");
         return;
     }
 
-    std::cout << "=== " << genre << " 추천 영화 ===" << std::endl;
+    std::cout << genre << " 추천 결과: " << recommendations.size() << "편" << std::endl;
     for (const auto &[movie, score] : recommendations)
     {
-        std::cout << *movie << " | 추천 점수: " << score << std::endl;
+        std::cout << *movie << " | 추천 점수: " << formatRating(score) << std::endl;
     }
+}
+
+void DisplayManager::printAvailableGenres() const
+{
+    const auto statisticsByGenre = movieManager.getGenreStatistics();
+
+    if (statisticsByGenre.empty())
+    {
+        return;
+    }
+
+    std::cout << "사용 가능한 장르: ";
+    bool isFirst = true;
+    for (const auto &[genre, statistics] : statisticsByGenre)
+    {
+        if (!isFirst)
+        {
+            std::cout << ", ";
+        }
+
+        std::cout << genre << "(" << statistics.movieCount << "편)";
+        isFirst = false;
+    }
+    std::cout << std::endl;
 }
 
 void DisplayManager::showStatisticsMenu() const
@@ -364,17 +494,16 @@ void DisplayManager::showStatisticsMenu() const
 
     while (isRunning)
     {
-        std::cout << std::endl
-                  << "=== 통계 메뉴 ===" << std::endl;
-        std::cout << "1. 전체 평균 평점" << std::endl;
-        std::cout << "2. 장르별 통계" << std::endl;
-        std::cout << "3. 평점 Top N 영화" << std::endl;
-        std::cout << "0. 돌아가기" << std::endl;
-        std::cout << std::endl;
+        printSectionHeader("통계 메뉴");
+        std::cout << " 1. 전체 평균 평점" << std::endl;
+        std::cout << " 2. 장르별 통계" << std::endl;
+        std::cout << " 3. 평점 Top N 영화" << std::endl;
+        std::cout << " 0. 돌아가기" << std::endl;
+        printDivider('-');
 
         if (!readIntValue("선택 > ", menu))
         {
-            std::cout << "입력이 종료되어 통계 메뉴를 닫습니다." << std::endl;
+            printInfoMessage("입력이 종료되어 통계 메뉴를 닫습니다.");
             return;
         }
 
@@ -395,19 +524,20 @@ void DisplayManager::showStatisticsMenu() const
                 printTopRatedMoviesStatistics();
                 break;
             default:
-                std::cout << "올바른 메뉴 번호를 입력해 주세요." << std::endl;
+                printWarningMessage("올바른 메뉴 번호를 입력해 주세요.");
                 break;
             }
         }
         catch (const std::exception &e)
         {
-            std::cout << "통계를 출력할 수 없습니다: " << e.what() << std::endl;
+            printWarningMessage(std::string("통계를 출력할 수 없습니다: ") + e.what());
         }
     }
 }
 
 void DisplayManager::printAverageRatingStatistics() const
 {
+    printSectionHeader("전체 평균 평점");
     std::cout << "전체 평균 평점: " << formatRating(movieManager.getAverageRating()) << std::endl;
     std::cout << "전체 평점 수: " << ratingManager.getRatingCount() << "건" << std::endl;
 }
@@ -420,11 +550,11 @@ void DisplayManager::printGenreStatistics() const
 
     if (statisticsByGenre.empty())
     {
-        std::cout << "등록된 영화가 없습니다." << std::endl;
+        printInfoMessage("등록된 영화가 없습니다.");
         return;
     }
 
-    std::cout << "=== 장르별 통계 ===" << std::endl;
+    printSectionHeader("장르별 통계");
     for (const auto &[genre, statistics] : statisticsByGenre)
     {
         std::cout << genre
@@ -442,8 +572,7 @@ void DisplayManager::printGenreStatistics() const
 
     if (!popularGenre.empty())
     {
-        std::cout << "인기 장르: " << popularGenre
-                  << " (" << maxRatingCount << "건)" << std::endl;
+        printSuccessMessage("인기 장르: " + popularGenre + " (" + std::to_string(maxRatingCount) + "건)");
     }
 }
 
@@ -453,24 +582,24 @@ void DisplayManager::printTopRatedMoviesStatistics() const
 
     if (!readIntValue("출력할 영화 수: ", limit))
     {
-        std::cout << "입력이 종료되어 Top N 출력을 취소합니다." << std::endl;
+        printInfoMessage("입력이 종료되어 Top N 출력을 취소합니다.");
         return;
     }
 
     if (limit <= 0)
     {
-        std::cout << "1 이상의 숫자를 입력해 주세요." << std::endl;
+        printWarningMessage("1 이상의 숫자를 입력해 주세요.");
         return;
     }
 
     const auto topMovies = movieManager.getTopRatedMovies(limit);
     if (topMovies.empty())
     {
-        std::cout << "평점이 등록된 영화가 없습니다." << std::endl;
+        printInfoMessage("평점이 등록된 영화가 없습니다.");
         return;
     }
 
-    std::cout << "=== 평점 Top " << topMovies.size() << " 영화 ===" << std::endl;
+    printSectionHeader("평점 Top " + std::to_string(topMovies.size()) + " 영화");
     for (const Movie *movie : topMovies)
     {
         std::cout << *movie << std::endl;
