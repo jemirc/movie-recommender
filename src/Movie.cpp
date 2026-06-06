@@ -1,4 +1,7 @@
 #include "Movie.h"
+
+#include <iomanip>
+
 // 기본 생성자도 만들어주신거임
 Movie::Movie()
     : id(0), releaseYear(0),
@@ -65,12 +68,18 @@ bool Movie::operator<(const Movie &other) const
 // 왼쪽에 os를 넣기위해 friend로 선언해서 private 멤버에도 접근 가능하게
 std::ostream &operator<<(std::ostream &os, const Movie &movie)
 {
+    const std::ios::fmtflags previousFlags = os.flags();
+    const std::streamsize previousPrecision = os.precision();
+
     os << "[영화] "
        << "ID: " << movie.id
        << " | 제목: " << movie.title
        << " | 장르: " << movie.genre
        << " | 개봉 연도: " << movie.releaseYear
-       << " | 평균 평점: " << movie.getAverageRating()
+       << " | 평균 평점: " << std::fixed << std::setprecision(2) << movie.getAverageRating()
        << " | 평점 수: " << movie.ratingCount << "건";
+
+    os.flags(previousFlags);
+    os.precision(previousPrecision);
     return os;
 }

@@ -1,4 +1,6 @@
 #include "Rating.h"
+
+#include <iomanip>
 #include <iostream>
 
 #include "MovieConstants.h"
@@ -40,9 +42,15 @@ bool Rating::operator==(const Rating &other) const
 
 ostream &operator<<(ostream &os, const Rating &rating)
 {
+    const ios::fmtflags previousFlags = os.flags();
+    const streamsize previousPrecision = os.precision();
+
     os << "[평점] "
        << "사용자 ID: " << rating.userId
        << " | 영화 ID: " << rating.movieId
-       << " | 점수: " << rating.score;
+       << " | 점수: " << fixed << setprecision(2) << rating.score;
+
+    os.flags(previousFlags);
+    os.precision(previousPrecision);
     return os;
 }
