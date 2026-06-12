@@ -33,7 +33,8 @@ public:
     std::size_t size() const override;
     Movie *findMovieById(int id);                                                     // 수정 가능한 영화 찾을때
     const Movie *findMovieById(int id) const;                                         // 읽기 전용으로 찾을때
-    std::vector<const Movie *> searchMoviesByTitle(const std::string &keyword) const; // 제목에 키워드가 들어가는 영화들 찾기
+    std::vector<const Movie *> searchMovies(const std::string &keyword) const;        // 제목/장르에 키워드가 들어가는 영화들 찾기
+    std::vector<const Movie *> searchMoviesByTitle(const std::string &keyword) const; // 기존 제목 검색 호환용
     std::vector<const Movie *> filterMoviesByGenre(const std::string &genre) const;   // 장르가 같은 영화만 찾기
     double getAverageRating() const;                                                  // 전체 평점 평균 계산
     std::map<std::string, GenreStatistics> getGenreStatistics() const;                // 장르별 영화/평점 통계 계산

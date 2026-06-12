@@ -220,11 +220,11 @@ void DisplayManager::addMovieMenu()
 
 void DisplayManager::searchMovieMenu() const
 {
-    // 제목 키워드만 입력받고 검색 자체는 MovieManager 검색 함수 쓰는거임
     std::string keyword;
 
-    printSectionHeader("영화 제목 검색");
-    std::cout << "검색할 제목 키워드: ";
+    printSectionHeader("영화 검색");
+    printInfoMessage("제목 또는 장르를 대소문자 구분 없이 부분 검색합니다.");
+    std::cout << "검색 키워드: ";
     clearInput();
     std::getline(std::cin, keyword);
 
@@ -234,7 +234,7 @@ void DisplayManager::searchMovieMenu() const
         return;
     }
 
-    const auto matchedMovies = movieManager.searchMoviesByTitle(keyword);
+    const auto matchedMovies = movieManager.searchMovies(keyword);
     if (matchedMovies.empty())
     {
         printInfoMessage("검색 결과가 없습니다.");

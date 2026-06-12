@@ -1,6 +1,7 @@
 #include "MovieManager.h"
 
 #include <algorithm> // find, sort 같은 알고리즘 함수 쓰려고 넣은거임
+#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -47,6 +48,22 @@ std::unique_ptr<Movie> parseMovieLine(const std::string &line)
     }
 
     return std::make_unique<Movie>(id, title, genre, year);
+}
+
+std::string normalizeSearchText(const std::string &text)
+{
+    std::string normalized = text;
+    std::transform(normalized.begin(), normalized.end(), normalized.begin(),
+                   [](unsigned char ch)
+                   {
+                       return static_cast<char>(std::tolower(ch));
+                   });
+    return normalized;
+}
+
+bool containsIgnoringAsciiCase(const std::string &text, const std::string &keyword)
+{
+    return normalizeSearchText(text).find(normalizeSearchText(keyword)) != std::string::npos;
 }
 }
 
@@ -157,14 +174,29 @@ const Movie *MovieManager::findMovieById(int id) const
     return nullptr;
 }
 
-std::vector<const Movie *> MovieManager::searchMoviesByTitle(const std::string &keyword) const
+std::vector<const Movie *> MovieManager::searchMovies(const std::string &keyword) const
 {
-    std::vector<const Movie *> matchedMovies; // 검색 결과 담아둘 벡터
+    std::vector<const Movie *> matchedMovies;
 
-    // 제목 안에 키워드가 포함되어 있으면 결과에 넣는거임
     for (const std::unique_ptr<Movie> &movie : movies)
     {
-        if (movie->getTitle().find(keyword) != std::string::npos)
+        if (containsIgnoringAsciiCase(movie->getTitle(), keyword) ||
+            containsIgnoringAsciiCase(movie->getGenre(), keyword))
+        {
+            matchedMovies.push_back(movie.get());
+        }
+    }
+
+    return matchedMovies;
+}
+
+std::vector<const Movie *> MovieManager::searchMoviesByTitle(const std::string &keyword) const
+{
+    std::vector<const Movie *> matchedMovies;
+
+    for (const std::unique_ptr<Movie> &movie : movies)
+    {
+        if (containsIgnoringAsciiCase(movie->getTitle(), keyword))
         {
             matchedMovies.push_back(movie.get());
         }
