@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -g -Iinclude
+CXXFLAGS = -std=c++17 -Wall -g -Iinclude -Ithird_party/tabulate/include -Ithird_party/termcolor/include
 TARGET = movie_recommender
 SRC_DIR = src
 OBJ_DIR = obj
