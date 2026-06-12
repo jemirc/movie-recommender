@@ -1,12 +1,14 @@
 #include "DisplayManager.h"
 
 #include <exception>
-#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <sstream>
 #include <string>
 
+#include <termcolor/termcolor.hpp>
+
+#include "ConsoleView.h"
 #include "MovieConstants.h"
 #include "Recommender.h"
 
@@ -16,30 +18,37 @@ constexpr int DIVIDER_WIDTH = 62;
 
 void printDivider(char fill)
 {
-    std::cout << std::string(DIVIDER_WIDTH, fill) << std::endl;
+    std::cout << termcolor::bright_blue
+              << std::string(DIVIDER_WIDTH, fill)
+              << termcolor::reset << std::endl;
 }
 
 void printSectionHeader(const std::string &title)
 {
     std::cout << std::endl;
     printDivider('=');
-    std::cout << title << std::endl;
+    std::cout << termcolor::bold << termcolor::bright_cyan
+              << title
+              << termcolor::reset << std::endl;
     printDivider('-');
 }
 
 void printInfoMessage(const std::string &message)
 {
-    std::cout << "[안내] " << message << std::endl;
+    std::cout << termcolor::bright_cyan << "[안내] "
+              << termcolor::reset << message << std::endl;
 }
 
 void printSuccessMessage(const std::string &message)
 {
-    std::cout << "[완료] " << message << std::endl;
+    std::cout << termcolor::bright_green << "[완료] "
+              << termcolor::reset << message << std::endl;
 }
 
 void printWarningMessage(const std::string &message)
 {
-    std::cout << "[확인] " << message << std::endl;
+    std::cout << termcolor::bright_yellow << "[확인] "
+              << termcolor::reset << message << std::endl;
 }
 
 bool readIntValue(const std::string &prompt, int &value)
@@ -48,7 +57,7 @@ bool readIntValue(const std::string &prompt, int &value)
     {
         std::string line;
 
-        std::cout << prompt;
+        std::cout << termcolor::bright_cyan << prompt << termcolor::reset;
         if (!std::getline(std::cin, line))
         {
             return false;
@@ -71,7 +80,7 @@ bool readDoubleValue(const std::string &prompt, double &value)
     {
         std::string line;
 
-        std::cout << prompt;
+        std::cout << termcolor::bright_cyan << prompt << termcolor::reset;
         if (!std::getline(std::cin, line))
         {
             return false;
@@ -88,12 +97,6 @@ bool readDoubleValue(const std::string &prompt, double &value)
     }
 }
 
-std::string formatRating(double rating)
-{
-    std::ostringstream output;
-    output << std::fixed << std::setprecision(2) << rating;
-    return output.str();
-}
 }
 
 DisplayManager::DisplayManager(MovieManager &movieManager, UserManager &userManager, RatingManager &ratingManager)
@@ -135,42 +138,46 @@ void DisplayManager::printMainMenu() const
 {
     std::cout << std::endl;
     printDivider('=');
-    std::cout << "Movie Recommender" << std::endl;
+    std::cout << termcolor::bold << termcolor::bright_cyan
+              << "Movie Recommender"
+              << termcolor::reset << std::endl;
     printDivider('-');
-    std::cout << "현재 데이터  영화 " << movieManager.getMovieCount() << "편"
+    std::cout << termcolor::bright_green << "현재 데이터  "
+              << termcolor::reset
+              << "영화 " << movieManager.getMovieCount() << "편"
               << " | 사용자 " << userManager.getUserCount() << "명"
               << " | 평점 " << ratingManager.getRatingCount() << "건" << std::endl;
     printDivider('-');
 
-    std::cout << "[영화]" << std::endl;
+    std::cout << termcolor::bright_yellow << "[영화]" << termcolor::reset << std::endl;
     std::cout << "  1. 영화 추가" << std::endl;
     std::cout << "  2. 제목으로 검색" << std::endl;
     std::cout << "  3. 전체 목록 출력" << std::endl;
     std::cout << "  4. 평점순 정렬 출력" << std::endl
               << std::endl;
 
-    std::cout << "[사용자]" << std::endl;
+    std::cout << termcolor::bright_yellow << "[사용자]" << termcolor::reset << std::endl;
     std::cout << "  5. 사용자 추가" << std::endl;
     std::cout << "  6. 사용자 목록 출력" << std::endl
               << std::endl;
 
-    std::cout << "[평점]" << std::endl;
+    std::cout << termcolor::bright_yellow << "[평점]" << termcolor::reset << std::endl;
     std::cout << "  7. 평점 입력" << std::endl;
     std::cout << "  8. 영화별 평점 보기" << std::endl
               << std::endl;
 
-    std::cout << "[추천]" << std::endl;
+    std::cout << termcolor::bright_yellow << "[추천]" << termcolor::reset << std::endl;
     std::cout << "  9. 사용자별 영화 추천" << std::endl;
     std::cout << " 10. 장르 필터 추천" << std::endl
               << std::endl;
 
-    std::cout << "[통계]" << std::endl;
+    std::cout << termcolor::bright_yellow << "[통계]" << termcolor::reset << std::endl;
     std::cout << " 11. 통계 보기" << std::endl
               << std::endl;
 
     std::cout << "  0. 종료" << std::endl;
     printDivider('=');
-    std::cout << "선택 > ";
+    std::cout << termcolor::bright_cyan << "선택 > " << termcolor::reset;
 }
 
 void DisplayManager::addMovieMenu()
@@ -234,11 +241,8 @@ void DisplayManager::searchMovieMenu() const
         return;
     }
 
-    std::cout << "검색 결과: " << matchedMovies.size() << "건" << std::endl;
-    for (const Movie *movie : matchedMovies)
-    {
-        std::cout << *movie << std::endl;
-    }
+    printInfoMessage("검색 결과: " + std::to_string(matchedMovies.size()) + "건");
+    ConsoleView::printMovieTable(matchedMovies);
 }
 
 void DisplayManager::printAllMoviesMenu() const
@@ -367,7 +371,7 @@ void DisplayManager::printMovieRatingsMenu() const
         return;
     }
 
-    std::cout << *movie << std::endl;
+    ConsoleView::printMovieTable(std::vector<const Movie *>{movie});
 
     const auto matchedRatings = ratingManager.getRatingsByMovieId(movieId);
     if (matchedRatings.empty())
@@ -376,7 +380,7 @@ void DisplayManager::printMovieRatingsMenu() const
         return;
     }
 
-    std::cout << "평점 " << matchedRatings.size() << "건" << std::endl;
+    printInfoMessage("평점 " + std::to_string(matchedRatings.size()) + "건");
     ratingManager.printRatingsByMovieId(movieId);
 }
 
@@ -459,7 +463,7 @@ void DisplayManager::printAvailableGenres() const
         return;
     }
 
-    std::cout << "사용 가능한 장르: ";
+    std::cout << termcolor::bright_cyan << "사용 가능한 장르: " << termcolor::reset;
     bool isFirst = true;
     for (const auto &[genre, statistics] : statisticsByGenre)
     {
@@ -468,7 +472,8 @@ void DisplayManager::printAvailableGenres() const
             std::cout << ", ";
         }
 
-        std::cout << genre << "(" << statistics.movieCount << "편)";
+        std::cout << termcolor::bright_green << genre << termcolor::reset
+                  << "(" << statistics.movieCount << "편)";
         isFirst = false;
     }
     std::cout << std::endl;
@@ -477,11 +482,8 @@ void DisplayManager::printAvailableGenres() const
 void DisplayManager::printRecommendationResults(const std::vector<std::pair<const Movie *, double>> &recommendations,
                                                 const std::string &title) const
 {
-    std::cout << title << ": " << recommendations.size() << "편" << std::endl;
-    for (const auto &[movie, score] : recommendations)
-    {
-        std::cout << *movie << " | 추천 점수: " << formatRating(score) << std::endl;
-    }
+    printInfoMessage(title + ": " + std::to_string(recommendations.size()) + "편");
+    ConsoleView::printRecommendationTable(recommendations);
 }
 
 void DisplayManager::showStatisticsMenu() const
@@ -494,10 +496,10 @@ void DisplayManager::showStatisticsMenu() const
     while (isRunning)
     {
         printSectionHeader("통계 메뉴");
-        std::cout << " 1. 전체 평균 평점" << std::endl;
-        std::cout << " 2. 장르별 통계" << std::endl;
-        std::cout << " 3. 평점 Top N 영화" << std::endl;
-        std::cout << " 0. 돌아가기" << std::endl;
+        std::cout << termcolor::bright_yellow << " 1." << termcolor::reset << " 전체 평균 평점" << std::endl;
+        std::cout << termcolor::bright_yellow << " 2." << termcolor::reset << " 장르별 통계" << std::endl;
+        std::cout << termcolor::bright_yellow << " 3." << termcolor::reset << " 평점 Top N 영화" << std::endl;
+        std::cout << termcolor::bright_yellow << " 0." << termcolor::reset << " 돌아가기" << std::endl;
         printDivider('-');
 
         if (!readIntValue("선택 > ", menu))
@@ -537,8 +539,10 @@ void DisplayManager::showStatisticsMenu() const
 void DisplayManager::printAverageRatingStatistics() const
 {
     printSectionHeader("전체 평균 평점");
-    std::cout << "전체 평균 평점: " << formatRating(movieManager.getAverageRating()) << std::endl;
-    std::cout << "전체 평점 수: " << ratingManager.getRatingCount() << "건" << std::endl;
+    ConsoleView::printKeyValueTable({
+        {"전체 평균 평점", ConsoleView::formatScore(movieManager.getAverageRating())},
+        {"전체 평점 수", std::to_string(ratingManager.getRatingCount()) + "건"},
+    });
 }
 
 void DisplayManager::printGenreStatistics() const
@@ -554,14 +558,10 @@ void DisplayManager::printGenreStatistics() const
     }
 
     printSectionHeader("장르별 통계");
+    ConsoleView::printGenreStatisticsTable(statisticsByGenre);
+
     for (const auto &[genre, statistics] : statisticsByGenre)
     {
-        std::cout << genre
-                  << " | 영화 수: " << statistics.movieCount
-                  << " | 평점 수: " << statistics.ratingCount
-                  << "건 | 평균 평점: " << formatRating(statistics.averageRating)
-                  << std::endl;
-
         if (statistics.ratingCount > maxRatingCount)
         {
             popularGenre = genre;
@@ -599,8 +599,5 @@ void DisplayManager::printTopRatedMoviesStatistics() const
     }
 
     printSectionHeader("평점 Top " + std::to_string(topMovies.size()) + " 영화");
-    for (const Movie *movie : topMovies)
-    {
-        std::cout << *movie << std::endl;
-    }
+    ConsoleView::printMovieTable(topMovies);
 }

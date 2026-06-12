@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "ConsoleView.h"
 #include "MovieConstants.h"
 
 namespace
@@ -281,11 +282,15 @@ std::vector<const Movie *> MovieManager::getTopRatedMovies(int limit) const
 
 void MovieManager::printAllMovies() const
 {
-    // 영화 정보 출력은 Movie의 operator<<를 그대로 활용하는거임
+    std::vector<const Movie *> allMovies;
+    allMovies.reserve(movies.size());
+
     for (const std::unique_ptr<Movie> &movie : movies)
     {
-        std::cout << *movie << std::endl;
+        allMovies.push_back(movie.get());
     }
+
+    ConsoleView::printMovieTable(allMovies);
 }
 
 void MovieManager::printMoviesSortedByRating() const
@@ -304,10 +309,7 @@ void MovieManager::printMoviesSortedByRating() const
                   return *left < *right;
               });
 
-    for (const Movie *movie : sortedMovies)
-    {
-        std::cout << *movie << std::endl;
-    }
+    ConsoleView::printMovieTable(sortedMovies);
 }
 
 void MovieManager::rebuildRatingsFrom(const std::vector<Rating> &ratings)

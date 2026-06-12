@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "ConsoleView.h"
 #include "MovieConstants.h"
 
 namespace
@@ -128,11 +129,15 @@ const User *UserManager::findUserById(int id) const
 
 void UserManager::printAllUsers() const
 {
-    // 유저 정보 출력도 User의 operator<<를 활용해서 통일하는거임
+    std::vector<const User *> allUsers;
+    allUsers.reserve(users.size());
+
     for (const User &user : users)
     {
-        std::cout << user << std::endl;
+        allUsers.push_back(&user);
     }
+
+    ConsoleView::printUserTable(allUsers);
 }
 
 std::size_t UserManager::getUserCount() const

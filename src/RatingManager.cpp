@@ -6,6 +6,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "ConsoleView.h"
 #include "MovieConstants.h"
 #include "MovieManager.h"
 #include "UserManager.h"
@@ -205,11 +206,7 @@ std::vector<const Rating *> RatingManager::getRatingsByMovieId(int movieId) cons
 void RatingManager::printRatingsByMovieId(int movieId) const
 {
     const std::vector<const Rating *> matchedRatings = getRatingsByMovieId(movieId);
-
-    for (const Rating *rating : matchedRatings)
-    {
-        std::cout << *rating << std::endl;
-    }
+    ConsoleView::printRatingTable(matchedRatings);
 }
 
 std::size_t RatingManager::getRatingCount() const
