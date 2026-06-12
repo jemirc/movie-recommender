@@ -17,18 +17,18 @@
 
 Movie Recommender는 영화, 사용자, 평점 데이터를 CSV 파일로 관리하고, 사용자 간 평점 유사도를 계산해 아직 보지 않은 영화를 추천하는 C++ 콘솔 프로그램입니다.
 
-M3까지 구현한 추천 시스템 위에 M4 발표용 확장 기능으로 `장르 필터 추천`과 `통계 기능`을 추가했습니다. 기능은 매니저 계층과 화면 입출력 계층을 분리해 유지보수하기 쉽게 구성했습니다.
+M3까지 구현한 추천 시스템 위에 M4 발표용 확장 기능으로 `장르 필터 추천`, `통계 기능`, `검색 강화`, `정렬 옵션`, `통계 CSV 내보내기`를 추가했습니다. 기능은 매니저 계층과 화면 입출력 계층을 분리해 유지보수하기 쉽게 구성했습니다.
 
 ## Highlights
 
 | Category | Feature |
 | --- | --- |
-| Movie | 영화 추가, 제목 검색, 전체 목록 출력, 평점순 정렬 |
+| Movie | 영화 추가, 제목/장르 통합 검색, 전체 목록 출력, 기본 정렬 옵션 |
 | User | 사용자 추가, 사용자 목록 출력 |
 | Rating | 평점 입력, 기존 평점 수정, 영화별 평점 조회 |
 | Recommendation | 유사 사용자 기반 영화 추천 |
-| Extension | 장르 필터 추천, 전체/장르별/Top N 통계, 콘솔 UI/UX 개선 |
-| Reliability | CSV 파일 I/O 예외 처리, 손상 라인 건너뛰기, 입력 검증 |
+| Extension | 장르 필터 추천, 전체/장르별/Top N 통계, 검색 강화, 정렬 옵션, 콘솔 UI/UX 개선 |
+| Reliability | CSV 파일 I/O 예외 처리, 손상 라인 건너뛰기, 통계 CSV 내보내기, 입력 검증 |
 
 ## Quick Start
 
@@ -70,9 +70,9 @@ Movie Recommender
 
 [영화]
   1. 영화 추가
-  2. 제목으로 검색
+  2. 제목/장르 검색
   3. 전체 목록 출력
-  4. 평점순 정렬 출력
+  4. 정렬 옵션 선택
 
 [사용자]
   5. 사용자 추가
@@ -88,6 +88,12 @@ Movie Recommender
 
 [통계]
 11. 통계 보기
+
+통계 하위 메뉴:
+  1. 전체 평균 평점
+  2. 장르별 통계
+  3. 평점 Top N 영화
+  4. 통계 CSV 내보내기
 
   0. 종료
 ==============================================================
@@ -213,6 +219,7 @@ recommendScore[movieId] += otherUserRating * similarity
 | `1. 전체 평균 평점` | 전체 평점 평균과 전체 평점 수 |
 | `2. 장르별 통계` | 장르별 영화 수, 평점 수, 평균 평점, 인기 장르 |
 | `3. 평점 Top N 영화` | 원하는 개수만큼 평균 평점 상위 영화 출력 |
+| `4. 통계 CSV 내보내기` | 전체/장르별/Top N 통계를 CSV 파일로 저장 |
 
 구현 포인트:
 
@@ -220,6 +227,39 @@ recommendScore[movieId] += otherUserRating * similarity
 - `std::map`과 구조적 바인딩으로 장르별 통계를 계산합니다.
 - `std::sort`와 람다로 Top N 영화를 정렬합니다.
 - 평점이 없는 데이터는 예외 또는 안내 메시지로 처리합니다.
+- 기본 저장 경로는 `data/statistics_export.csv`이며, 저장 경로와 Top N 개수를 입력할 수 있습니다.
+
+### Search Enhancement
+
+메뉴 `2. 제목/장르 검색`에서 제목과 장르를 함께 검색합니다.
+
+구현 포인트:
+
+- 부분 일치 검색을 지원합니다.
+- `SF`와 `sf`처럼 영문 대소문자 차이를 무시합니다.
+- 검색 결과는 현재 선택된 기본 정렬 옵션에 맞춰 출력합니다.
+
+### Sort Options
+
+메뉴 `4. 정렬 옵션 선택`에서 기본 정렬 방식을 선택합니다.
+
+| Option | Behavior |
+| --- | --- |
+| `1. 평점순` | 평균 평점, 평점 수, ID 기준 |
+| `2. 가나다순` | 영화 제목 기준 |
+| `3. 최신순` | 개봉 연도 기준 |
+
+선택한 정렬 옵션은 전체 목록, 검색 결과, 추천 결과, Top N 결과 출력에 적용됩니다.
+
+### CSV Export
+
+통계 메뉴 `4. 통계 CSV 내보내기`에서 통계 결과를 CSV 파일로 저장합니다.
+
+CSV에는 다음 행 유형이 포함됩니다.
+
+- `overall`: 전체 평균 평점과 전체 평점 수
+- `genre`: 장르별 영화 수, 평점 수, 평균 평점
+- `top_movie`: 평균 평점 기준 Top N 영화
 
 ### UI/UX
 
@@ -290,7 +330,10 @@ recommendScore[movieId] += otherUserRating * similarity
 - `make` 빌드 성공
 - 메뉴 `1`부터 `11`까지 임시 데이터로 전체 리허설 성공
 - 추천 알고리즘과 장르 필터 추천 출력 확인
+- 제목/장르 통합 검색과 대소문자 무시 검색 확인
+- 기본 정렬 옵션이 전체 목록, 검색 결과, 추천 결과에 적용되는지 확인
 - 전체 평균, 장르별 통계, Top N 통계 출력 확인
+- 통계 CSV 내보내기와 CSV 파일 내용 확인
 - 개선된 콘솔 메뉴, 장르 선택 힌트, 점수 포맷 확인
 - CSV 파일 누락 시 초기 로딩 실패 메시지와 비정상 종료 확인
 - 손상된 CSV 라인은 건너뛰고 정상 라인으로 프로그램 실행 확인
@@ -311,7 +354,10 @@ recommendScore[movieId] += otherUserRating * similarity
 main
 ├── feature/genre-filter
 ├── feature/statistics
-└── feature/ui
+├── feature/ui
+├── feature/search-enhancement
+├── feature/sort-options
+└── feature/csv-export
 ```
 
 완료된 기능 브랜치:
@@ -319,6 +365,9 @@ main
 - `feature/genre-filter`
 - `feature/statistics`
 - `feature/ui`
+- `feature/search-enhancement`
+- `feature/sort-options`
+- `feature/csv-export`
 
 README와 발표 문서 정리는 필요할 때 main에서 바로 업데이트합니다.
 
