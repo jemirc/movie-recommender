@@ -50,6 +50,7 @@ public:
     double getAverageRating() const;                                                  // 전체 평점 평균 계산
     std::map<std::string, GenreStatistics> getGenreStatistics() const;                // 장르별 영화/평점 통계 계산
     std::vector<const Movie *> getTopRatedMovies(int limit) const;                    // 평균 평점 상위 영화 찾기
+    void exportStatisticsToCsv(const std::string &filename, int topMovieLimit) const; // 통계 결과를 CSV 파일로 저장
     void printAllMovies() const;                                                      // 전체 영화 목록 출력
     void printMoviesSortedByRating() const;                                           // 평점순으로 정렬해서 출력
     void rebuildRatingsFrom(const std::vector<Rating> &ratings);

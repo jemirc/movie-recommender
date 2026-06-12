@@ -586,6 +586,7 @@ void DisplayManager::showStatisticsMenu() const
         std::cout << termcolor::bright_yellow << " 1." << termcolor::reset << " 전체 평균 평점" << std::endl;
         std::cout << termcolor::bright_yellow << " 2." << termcolor::reset << " 장르별 통계" << std::endl;
         std::cout << termcolor::bright_yellow << " 3." << termcolor::reset << " 평점 Top N 영화" << std::endl;
+        std::cout << termcolor::bright_yellow << " 4." << termcolor::reset << " 통계 CSV 내보내기" << std::endl;
         std::cout << termcolor::bright_yellow << " 0." << termcolor::reset << " 돌아가기" << std::endl;
         printDivider('-');
 
@@ -610,6 +611,9 @@ void DisplayManager::showStatisticsMenu() const
                 break;
             case 3:
                 printTopRatedMoviesStatistics();
+                break;
+            case 4:
+                exportStatisticsCsvMenu();
                 break;
             default:
                 printWarningMessage("올바른 메뉴 번호를 입력해 주세요.");
@@ -690,4 +694,38 @@ void DisplayManager::printTopRatedMoviesStatistics() const
     movieManager.sortMovies(sortedTopMovies, selectedSortOption);
     printSortStatus();
     ConsoleView::printMovieTable(sortedTopMovies);
+}
+
+void DisplayManager::exportStatisticsCsvMenu() const
+{
+    constexpr const char *DEFAULT_STATISTICS_EXPORT_FILE = "data/statistics_export.csv";
+    int topMovieLimit = 0;
+    std::string filename;
+
+    printSectionHeader("통계 CSV 내보내기");
+    std::cout << termcolor::bright_cyan
+              << "저장 파일 경로(엔터: " << DEFAULT_STATISTICS_EXPORT_FILE << "): "
+              << termcolor::reset;
+    std::getline(std::cin, filename);
+
+    if (filename.empty())
+    {
+        filename = DEFAULT_STATISTICS_EXPORT_FILE;
+    }
+
+    if (!readIntValue("CSV에 포함할 Top N 영화 수: ", topMovieLimit))
+    {
+        printInfoMessage("입력이 종료되어 CSV 내보내기를 취소합니다.");
+        return;
+    }
+
+    try
+    {
+        movieManager.exportStatisticsToCsv(filename, topMovieLimit);
+        printSuccessMessage("통계 CSV를 저장했습니다: " + filename);
+    }
+    catch (const std::exception &e)
+    {
+        printWarningMessage(std::string("CSV 내보내기 실패: ") + e.what());
+    }
 }

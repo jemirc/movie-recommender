@@ -27,6 +27,7 @@ private:
     void printAverageRatingStatistics() const;
     void printGenreStatistics() const;
     void printTopRatedMoviesStatistics() const;
+    void exportStatisticsCsvMenu() const;
 
 public:
     DisplayManager(MovieManager &movieManager, UserManager &userManager, RatingManager &ratingManager);

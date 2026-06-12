@@ -3,6 +3,7 @@
 #include <algorithm> // find, sort 같은 알고리즘 함수 쓰려고 넣은거임
 #include <cctype>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <map>
@@ -20,6 +21,53 @@ namespace
 bool shouldSkipLine(const std::string &line)
 {
     return line.empty() || line[0] == '#';
+}
+
+std::string formatCsvScore(double score)
+{
+    std::ostringstream output;
+    output << std::fixed << std::setprecision(2) << score;
+    return output.str();
+}
+
+std::string escapeCsvCell(const std::string &cell)
+{
+    bool shouldQuote = false;
+    std::string escaped;
+
+    for (char ch : cell)
+    {
+        if (ch == '"' || ch == ',' || ch == '\n' || ch == '\r')
+        {
+            shouldQuote = true;
+        }
+
+        if (ch == '"')
+        {
+            escaped += "\"\"";
+        }
+        else
+        {
+            escaped += ch;
+        }
+    }
+
+    return shouldQuote ? "\"" + escaped + "\"" : escaped;
+}
+
+void writeCsvRow(std::ofstream &file, const std::vector<std::string> &cells)
+{
+    for (std::size_t index = 0; index < cells.size(); index++)
+    {
+        if (index > 0)
+        {
+            file << ',';
+        }
+
+        file << escapeCsvCell(cells[index]);
+    }
+
+    file << '\n';
 }
 
 std::unique_ptr<Movie> parseMovieLine(const std::string &line)
@@ -99,6 +147,15 @@ bool comesBeforeByLatest(const Movie *left, const Movie *right)
     }
 
     return left->getId() < right->getId();
+}
+
+int countTotalRatings(const std::vector<std::unique_ptr<Movie>> &movies)
+{
+    return std::accumulate(movies.begin(), movies.end(), 0,
+                           [](int total, const std::unique_ptr<Movie> &movie)
+                           {
+                               return total + movie->getRatingCount();
+                           });
 }
 }
 
@@ -307,11 +364,7 @@ std::vector<const Movie *> MovieManager::filterMoviesByGenre(const std::string &
 
 double MovieManager::getAverageRating() const
 {
-    const int totalRatingCount = std::accumulate(movies.begin(), movies.end(), 0,
-                                                 [](int total, const std::unique_ptr<Movie> &movie)
-                                                 {
-                                                     return total + movie->getRatingCount();
-                                                 });
+    const int totalRatingCount = countTotalRatings(movies);
 
     if (totalRatingCount == 0)
     {
@@ -390,6 +443,43 @@ std::vector<const Movie *> MovieManager::getTopRatedMovies(int limit) const
     }
 
     return sortedMovies;
+}
+
+void MovieManager::exportStatisticsToCsv(const std::string &filename, int topMovieLimit) const
+{
+    if (topMovieLimit <= 0)
+    {
+        throw std::invalid_argument("Top N 영화 수는 1 이상이어야 합니다");
+    }
+
+    std::ofstream file(filename);
+    if (!file.is_open())
+    {
+        throw std::runtime_error("통계 CSV 파일을 저장할 수 없습니다: " + filename);
+    }
+
+    writeCsvRow(file, {"section", "rank", "name", "movie_id", "genre", "release_year", "movie_count", "rating_count", "average_rating"});
+
+    const int totalRatingCount = countTotalRatings(movies);
+    writeCsvRow(file, {"overall", "", "전체 평균 평점", "", "", "", "", std::to_string(totalRatingCount),
+                       totalRatingCount > 0 ? formatCsvScore(getAverageRating()) : "0.00"});
+
+    const auto statisticsByGenre = getGenreStatistics();
+    for (const auto &[genre, statistics] : statisticsByGenre)
+    {
+        writeCsvRow(file, {"genre", "", genre, "", "", "", std::to_string(statistics.movieCount),
+                           std::to_string(statistics.ratingCount), formatCsvScore(statistics.averageRating)});
+    }
+
+    const auto topMovies = getTopRatedMovies(topMovieLimit);
+    int rank = 1;
+    for (const Movie *movie : topMovies)
+    {
+        writeCsvRow(file, {"top_movie", std::to_string(rank), movie->getTitle(), std::to_string(movie->getId()),
+                           movie->getGenre(), std::to_string(movie->getReleaseYear()), "",
+                           std::to_string(movie->getRatingCount()), formatCsvScore(movie->getAverageRating())});
+        rank++;
+    }
 }
 
 void MovieManager::printAllMovies() const
