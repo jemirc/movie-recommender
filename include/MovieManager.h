@@ -17,6 +17,15 @@ struct GenreStatistics
     double averageRating = 0.0;
 };
 
+enum class MovieSortOption
+{
+    Rating,
+    Title,
+    Latest
+};
+
+std::string getMovieSortOptionLabel(MovieSortOption sortOption);
+
 // Movie 객체 여러개를 한곳에서 관리하려고 만든 클래스
 class MovieManager : public BaseManager
 {
@@ -33,6 +42,8 @@ public:
     std::size_t size() const override;
     Movie *findMovieById(int id);                                                     // 수정 가능한 영화 찾을때
     const Movie *findMovieById(int id) const;                                         // 읽기 전용으로 찾을때
+    std::vector<const Movie *> getAllMovies(MovieSortOption sortOption) const;        // 현재 영화 목록을 정렬 기준에 맞게 반환
+    void sortMovies(std::vector<const Movie *> &movies, MovieSortOption sortOption) const;
     std::vector<const Movie *> searchMovies(const std::string &keyword) const;        // 제목/장르에 키워드가 들어가는 영화들 찾기
     std::vector<const Movie *> searchMoviesByTitle(const std::string &keyword) const; // 기존 제목 검색 호환용
     std::vector<const Movie *> filterMoviesByGenre(const std::string &genre) const;   // 장르가 같은 영화만 찾기

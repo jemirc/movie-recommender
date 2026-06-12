@@ -1,5 +1,6 @@
 #include "DisplayManager.h"
 
+#include <algorithm>
 #include <exception>
 #include <iostream>
 #include <limits>
@@ -100,7 +101,10 @@ bool readDoubleValue(const std::string &prompt, double &value)
 }
 
 DisplayManager::DisplayManager(MovieManager &movieManager, UserManager &userManager, RatingManager &ratingManager)
-    : movieManager(movieManager), userManager(userManager), ratingManager(ratingManager)
+    : movieManager(movieManager),
+      userManager(userManager),
+      ratingManager(ratingManager),
+      selectedSortOption(MovieSortOption::Rating)
 {
 }
 
@@ -134,6 +138,54 @@ bool DisplayManager::readRecommendableUserId(int &userId) const
     return true;
 }
 
+void DisplayManager::printSortStatus() const
+{
+    printInfoMessage("현재 기본 정렬: " + getMovieSortOptionLabel(selectedSortOption));
+}
+
+void DisplayManager::sortRecommendations(std::vector<std::pair<const Movie *, double>> &recommendations) const
+{
+    switch (selectedSortOption)
+    {
+    case MovieSortOption::Rating:
+        std::sort(recommendations.begin(), recommendations.end(),
+                  [](const auto &left, const auto &right)
+                  {
+                      if (left.second != right.second)
+                      {
+                          return left.second > right.second;
+                      }
+
+                      return left.first->getId() < right.first->getId();
+                  });
+        break;
+    case MovieSortOption::Title:
+        std::sort(recommendations.begin(), recommendations.end(),
+                  [](const auto &left, const auto &right)
+                  {
+                      if (left.first->getTitle() != right.first->getTitle())
+                      {
+                          return left.first->getTitle() < right.first->getTitle();
+                      }
+
+                      return left.first->getId() < right.first->getId();
+                  });
+        break;
+    case MovieSortOption::Latest:
+        std::sort(recommendations.begin(), recommendations.end(),
+                  [](const auto &left, const auto &right)
+                  {
+                      if (left.first->getReleaseYear() != right.first->getReleaseYear())
+                      {
+                          return left.first->getReleaseYear() > right.first->getReleaseYear();
+                      }
+
+                      return left.first->getId() < right.first->getId();
+                  });
+        break;
+    }
+}
+
 void DisplayManager::printMainMenu() const
 {
     std::cout << std::endl;
@@ -153,7 +205,7 @@ void DisplayManager::printMainMenu() const
     std::cout << "  1. 영화 추가" << std::endl;
     std::cout << "  2. 제목으로 검색" << std::endl;
     std::cout << "  3. 전체 목록 출력" << std::endl;
-    std::cout << "  4. 평점순 정렬 출력" << std::endl
+    std::cout << "  4. 정렬 옵션 선택" << std::endl
               << std::endl;
 
     std::cout << termcolor::bright_yellow << "[사용자]" << termcolor::reset << std::endl;
@@ -224,6 +276,7 @@ void DisplayManager::searchMovieMenu() const
 
     printSectionHeader("영화 검색");
     printInfoMessage("제목 또는 장르를 대소문자 구분 없이 부분 검색합니다.");
+    printSortStatus();
     std::cout << "검색 키워드: ";
     clearInput();
     std::getline(std::cin, keyword);
@@ -234,13 +287,14 @@ void DisplayManager::searchMovieMenu() const
         return;
     }
 
-    const auto matchedMovies = movieManager.searchMovies(keyword);
+    auto matchedMovies = movieManager.searchMovies(keyword);
     if (matchedMovies.empty())
     {
         printInfoMessage("검색 결과가 없습니다.");
         return;
     }
 
+    movieManager.sortMovies(matchedMovies, selectedSortOption);
     printInfoMessage("검색 결과: " + std::to_string(matchedMovies.size()) + "건");
     ConsoleView::printMovieTable(matchedMovies);
 }
@@ -255,21 +309,52 @@ void DisplayManager::printAllMoviesMenu() const
         return;
     }
 
+    printSortStatus();
     std::cout << "총 " << movieManager.getMovieCount() << "편" << std::endl;
-    movieManager.printAllMovies();
+    ConsoleView::printMovieTable(movieManager.getAllMovies(selectedSortOption));
 }
 
-void DisplayManager::printSortedMoviesMenu() const
+void DisplayManager::printSortedMoviesMenu()
 {
-    // 평점순 출력도 목록이 있을때만 매니저 출력 함수 호출하는 구조임
-    printSectionHeader("평점순 영화 목록");
+    int menu = 0;
+
+    printSectionHeader("정렬 옵션 선택");
     if (movieManager.getMovieCount() == 0)
     {
         printInfoMessage("등록된 영화가 없습니다.");
         return;
     }
 
-    movieManager.printMoviesSortedByRating();
+    printSortStatus();
+    std::cout << termcolor::bright_yellow << " 1." << termcolor::reset << " 평점순" << std::endl;
+    std::cout << termcolor::bright_yellow << " 2." << termcolor::reset << " 가나다순" << std::endl;
+    std::cout << termcolor::bright_yellow << " 3." << termcolor::reset << " 최신순" << std::endl;
+    printDivider('-');
+
+    if (!readIntValue("선택 > ", menu))
+    {
+        printInfoMessage("입력이 종료되어 정렬 변경을 취소합니다.");
+        return;
+    }
+
+    switch (menu)
+    {
+    case 1:
+        selectedSortOption = MovieSortOption::Rating;
+        break;
+    case 2:
+        selectedSortOption = MovieSortOption::Title;
+        break;
+    case 3:
+        selectedSortOption = MovieSortOption::Latest;
+        break;
+    default:
+        printWarningMessage("올바른 정렬 옵션을 입력해 주세요.");
+        return;
+    }
+
+    printSuccessMessage("기본 정렬을 " + getMovieSortOptionLabel(selectedSortOption) + "으로 변경했습니다.");
+    ConsoleView::printMovieTable(movieManager.getAllMovies(selectedSortOption));
 }
 
 void DisplayManager::addUserMenu()
@@ -397,9 +482,9 @@ void DisplayManager::recommendMovieMenu() const
     }
 
     Recommender recommender(movieManager, ratingManager);
-    const auto recommendations = recommender.recommend(userId,
-                                                       MovieConstants::DEFAULT_TOP_K_USERS,
-                                                       MovieConstants::DEFAULT_TOP_N_MOVIES);
+    auto recommendations = recommender.recommend(userId,
+                                                 MovieConstants::DEFAULT_TOP_K_USERS,
+                                                 MovieConstants::DEFAULT_TOP_N_MOVIES);
 
     if (recommendations.empty())
     {
@@ -407,6 +492,7 @@ void DisplayManager::recommendMovieMenu() const
         return;
     }
 
+    sortRecommendations(recommendations);
     printRecommendationResults(recommendations, "추천 결과");
 }
 
@@ -440,10 +526,10 @@ void DisplayManager::recommendMovieByGenreMenu() const
     }
 
     Recommender recommender(movieManager, ratingManager);
-    const auto recommendations = recommender.recommend(userId,
-                                                       MovieConstants::DEFAULT_TOP_K_USERS,
-                                                       MovieConstants::DEFAULT_TOP_N_MOVIES,
-                                                       genre);
+    auto recommendations = recommender.recommend(userId,
+                                                 MovieConstants::DEFAULT_TOP_K_USERS,
+                                                 MovieConstants::DEFAULT_TOP_N_MOVIES,
+                                                 genre);
 
     if (recommendations.empty())
     {
@@ -451,6 +537,7 @@ void DisplayManager::recommendMovieByGenreMenu() const
         return;
     }
 
+    sortRecommendations(recommendations);
     printRecommendationResults(recommendations, genre + " 추천 결과");
 }
 
@@ -599,5 +686,8 @@ void DisplayManager::printTopRatedMoviesStatistics() const
     }
 
     printSectionHeader("평점 Top " + std::to_string(topMovies.size()) + " 영화");
-    ConsoleView::printMovieTable(topMovies);
+    auto sortedTopMovies = topMovies;
+    movieManager.sortMovies(sortedTopMovies, selectedSortOption);
+    printSortStatus();
+    ConsoleView::printMovieTable(sortedTopMovies);
 }

@@ -65,6 +65,56 @@ bool containsIgnoringAsciiCase(const std::string &text, const std::string &keywo
 {
     return normalizeSearchText(text).find(normalizeSearchText(keyword)) != std::string::npos;
 }
+
+bool comesBeforeByRating(const Movie *left, const Movie *right)
+{
+    if (left->getAverageRating() != right->getAverageRating())
+    {
+        return left->getAverageRating() > right->getAverageRating();
+    }
+
+    if (left->getRatingCount() != right->getRatingCount())
+    {
+        return left->getRatingCount() > right->getRatingCount();
+    }
+
+    return left->getId() < right->getId();
+}
+
+bool comesBeforeByTitle(const Movie *left, const Movie *right)
+{
+    if (left->getTitle() != right->getTitle())
+    {
+        return left->getTitle() < right->getTitle();
+    }
+
+    return left->getId() < right->getId();
+}
+
+bool comesBeforeByLatest(const Movie *left, const Movie *right)
+{
+    if (left->getReleaseYear() != right->getReleaseYear())
+    {
+        return left->getReleaseYear() > right->getReleaseYear();
+    }
+
+    return left->getId() < right->getId();
+}
+}
+
+std::string getMovieSortOptionLabel(MovieSortOption sortOption)
+{
+    switch (sortOption)
+    {
+    case MovieSortOption::Rating:
+        return "평점순";
+    case MovieSortOption::Title:
+        return "가나다순";
+    case MovieSortOption::Latest:
+        return "최신순";
+    }
+
+    return "평점순";
 }
 
 MovieManager::MovieManager()
@@ -172,6 +222,36 @@ const Movie *MovieManager::findMovieById(int id) const
     }
 
     return nullptr;
+}
+
+std::vector<const Movie *> MovieManager::getAllMovies(MovieSortOption sortOption) const
+{
+    std::vector<const Movie *> allMovies;
+    allMovies.reserve(movies.size());
+
+    for (const std::unique_ptr<Movie> &movie : movies)
+    {
+        allMovies.push_back(movie.get());
+    }
+
+    sortMovies(allMovies, sortOption);
+    return allMovies;
+}
+
+void MovieManager::sortMovies(std::vector<const Movie *> &moviesToSort, MovieSortOption sortOption) const
+{
+    switch (sortOption)
+    {
+    case MovieSortOption::Rating:
+        std::sort(moviesToSort.begin(), moviesToSort.end(), comesBeforeByRating);
+        break;
+    case MovieSortOption::Title:
+        std::sort(moviesToSort.begin(), moviesToSort.end(), comesBeforeByTitle);
+        break;
+    case MovieSortOption::Latest:
+        std::sort(moviesToSort.begin(), moviesToSort.end(), comesBeforeByLatest);
+        break;
+    }
 }
 
 std::vector<const Movie *> MovieManager::searchMovies(const std::string &keyword) const
@@ -314,34 +394,12 @@ std::vector<const Movie *> MovieManager::getTopRatedMovies(int limit) const
 
 void MovieManager::printAllMovies() const
 {
-    std::vector<const Movie *> allMovies;
-    allMovies.reserve(movies.size());
-
-    for (const std::unique_ptr<Movie> &movie : movies)
-    {
-        allMovies.push_back(movie.get());
-    }
-
-    ConsoleView::printMovieTable(allMovies);
+    ConsoleView::printMovieTable(getAllMovies(MovieSortOption::Rating));
 }
 
 void MovieManager::printMoviesSortedByRating() const
 {
-    std::vector<const Movie *> sortedMovies;
-    sortedMovies.reserve(movies.size());
-
-    for (const std::unique_ptr<Movie> &movie : movies)
-    {
-        sortedMovies.push_back(movie.get());
-    }
-
-    std::sort(sortedMovies.begin(), sortedMovies.end(),
-              [](const Movie *left, const Movie *right)
-              {
-                  return *left < *right;
-              });
-
-    ConsoleView::printMovieTable(sortedMovies);
+    ConsoleView::printMovieTable(getAllMovies(MovieSortOption::Rating));
 }
 
 void MovieManager::rebuildRatingsFrom(const std::vector<Rating> &ratings)
